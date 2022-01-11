@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+moviepy = "*"
+djangorestframework = "*"
+django-cors-headers = "*"
+azure-cognitiveservices-vision-computervision = "*"
+uvicorn = "*"
+ffmpeg-python = "*"
+ffprobe = "*"
+azure-storage = "*"
+azure-storage-blob = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"
