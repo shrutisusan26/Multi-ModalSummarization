@@ -7,19 +7,13 @@ from preprocessing import Preprocessing
 import torch.nn.functional as F
 import gc
 
-def get_feat(video_path):
+def get_feat(video_path,fr):
     dataset = VideoLoader(
         video_path,
-        framerate=1,
+        framerate=fr,
         size=112,
         centercrop=True,
     )
-    # loader = DataLoader(
-    #     dataset,
-    #     batch_size=1,
-    #     shuffle=False,
-    #     num_workers=0,
-    # )
     preprocess = Preprocessing()
     model = get_model()
 

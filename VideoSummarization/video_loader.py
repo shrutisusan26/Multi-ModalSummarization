@@ -26,7 +26,7 @@ class VideoLoader():
         print("Inside get_video_dim")
         print(os.path.isfile(video_path))
         probe = ffmpeg.probe(video_path)
-        print(probe)
+        #print(probe)
         video_stream = next((stream for stream in probe['streams']
                              if stream['codec_type'] == 'video'), None)
         width = int(video_stream['width'])
@@ -65,6 +65,7 @@ class VideoLoader():
                         'output': output_file}
             print("Done probing...")
             height, width = self._get_output_dim(h, w)
+            print(self.framerate)
             cmd = (
                 ffmpeg
                 .input(video_path)
