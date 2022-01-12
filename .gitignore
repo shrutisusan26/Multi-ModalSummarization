@@ -105,3 +105,9 @@ ENV/
 .mypy_cache/
 
 .DS_Store
+
+config.py
+
+#media
+*.mp3
+*.mp4

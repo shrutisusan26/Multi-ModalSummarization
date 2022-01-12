@@ -5,31 +5,55 @@ import time
 import swagger_client as cris_client
 import config
 from azure.storage.blob.baseblobservice import BaseBlobService
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, BlobBlock
 import os
 import moviepy.editor as mp
 from azure.storage.blob.models import BlobPermissions
 from datetime import datetime, timedelta
+import uuid
+from azure.core.exceptions import ResourceNotFoundError
+from pydub import AudioSegment
 
 # Configure Logging
 logging.basicConfig(stream=sys.stdout, format="%(asctime)s %(message)s", datefmt="%d/%m/%Y %I:%M:%S %p %Z")
 
 container_name = 'forlecture' # for example, `test`
-blob_name = 'record.mp3' # for example, `whatstheweatherlike.wav`
 account_name = config.storage_name
 account_key = config.storage_key
 
-clip = mp.VideoFileClip("Search in an almost sorted array  GeeksforGeeks.mp4")
+video_clip = "Search in an almost sorted array  GeeksforGeeks.mp4"
+
+clip = mp.VideoFileClip(video_clip)
+blob_name = video_clip[:-3]+'mp3' # for example, `whatstheweatherlike.wav`
 # Insert Local Audio File Path
 
-if not os.path.isfile("record.mp3"):
-    clip.audio.write_audiofile("record.mp3")
+block_list=[]
+chunk_size=2048
+
+if not os.path.isfile(blob_name):
+    clip.audio.write_audiofile(blob_name)
+    sound = AudioSegment.from_mp3(blob_name)
+    sound = sound.set_channels(1)
+    sound.export(blob_name, format="mp3")
     
-    blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
-    blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
+blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+
+try: 
+    blob_client.get_blob_properties()
+except ResourceNotFoundError:
     print("\nUploading to Azure Storage as blob:\n\t" + blob_name)
     with open(blob_name, "rb") as data:
-        blob_client.upload_blob(data)
+        while True:
+            read_data = data.read(chunk_size)
+            if not read_data:
+                break
+            blk_id = str(uuid.uuid4())
+            blob_client.stage_block(block_id=blk_id,data=read_data) 
+            block_list.append(BlobBlock(block_id=blk_id))
+    blob_client.commit_block_list(block_list)
+
+
         
 blob_service = BaseBlobService(
     account_name=account_name,
@@ -45,8 +69,8 @@ url_with_sas = blob_service.make_blob_url(container_name, blob_name, sas_token=s
 SUBSCRIPTION_KEY = config.api_key
 SERVICE_REGION = "centralindia"
 
-NAME = "GFG Lecture"
-DESCRIPTION = "Demo of container-based phone call transcriptions."
+NAME = blob_name[:-3]
+DESCRIPTION = "Lecture Video"
 
 LOCALE = "en-US"
 RECORDINGS_BLOB_URI = url_with_sas
@@ -106,7 +130,7 @@ def transcribe():
     properties = {
         "wordLevelTimestampsEnabled": True,
         "diarizationEnabled": True,
-        "destinationContainerUrl": "https://btspeechtotext.blob.core.windows.net/forlecture?sp=rwl&st=2022-01-11T14:55:43Z&se=2022-01-11T22:55:43Z&spr=https&sv=2020-08-04&sr=c&sig=C%2B221PFI4bzGYMjDxzrjBnJb4ZxjsoQ1wRN0TU9YqeM%3D", # TODO: Supply SAS URI
+        "destinationContainerUrl": "https://btspeechtotext.blob.core.windows.net/forlecture?sp=rwl&st=2022-01-12T11:37:16Z&se=2022-01-12T19:37:16Z&spr=https&sv=2020-08-04&sr=c&sig=qxaLZcA16sEF5l0P3Y9cHHVQM7CpGLTkI9yxXIiq9uk%3D", # TODO: Supply SAS URI
         "timeToLive": "PT1H"
     }
     
