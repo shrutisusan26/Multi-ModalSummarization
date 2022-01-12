@@ -12,8 +12,7 @@ class Normalize(object):
 
 class Preprocessing(object):
 
-    def __init__(self, type):
-        self.type = type
+    def __init__(self):
         self.norm = Normalize(mean=[110.6, 103.2, 96.3], std=[1.0, 1.0, 1.0])
 
     def _zero_pad(self, tensor, size):

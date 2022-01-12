@@ -1,8 +1,17 @@
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import pairwise_distances_argmin_min
+from extract import get_feat
 
-op = np.load('op.npy')
+ip =r'E:\Multi-Modal Summarization\VideoSummarization\Data\videos\input.mp4'
+get_feat(ip)
+opn =ip[0:10]
+opn = opn.replace(r'\.','')
+opn = opn.replace('\\','')
+opn = opn.replace(':','')
+output_file = './Data/'+opn+'op.npy'
+print(output_file)
+op = np.load(output_file)
 print(op.shape)
 n_clusters = int(op.shape[0]//3)
 print(n_clusters)

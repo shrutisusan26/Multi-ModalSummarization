@@ -14,7 +14,8 @@ import uuid
 from azure.core.exceptions import ResourceNotFoundError
 from pydub import AudioSegment
 
-# Configure Logging
+
+# Configre Logging
 logging.basicConfig(stream=sys.stdout, format="%(asctime)s %(message)s", datefmt="%d/%m/%Y %I:%M:%S %p %Z")
 
 container_name = 'forlecture' # for example, `test`

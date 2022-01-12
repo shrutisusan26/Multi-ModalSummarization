@@ -1,17 +1,15 @@
 import torch as th
-from torch.utils.data import Dataset
+#from torch.utils.data import Dataset
 import pandas as pd
 import os
 import numpy as np
 import ffmpeg
+import re
 
-
-class VideoLoader(Dataset):
-    """Pytorch video loader."""
-
+class VideoLoader():
     def __init__(
             self,
-            csv,
+            fname,
             framerate=1,
             size=112,
             centercrop=False,
@@ -19,14 +17,10 @@ class VideoLoader(Dataset):
         """
         Args:
         """
-        self.csv = pd.read_csv(csv)
-    
+        self.fname = fname
         self.centercrop = centercrop
         self.size = size
         self.framerate = framerate
-
-    def __len__(self):
-        return len(self.csv)
 
     def _get_video_dim(self, video_path):
         print("Inside get_video_dim")
@@ -49,9 +43,14 @@ class VideoLoader(Dataset):
         else:
             return self.size, int(w * self.size / h)
 
-    def __getitem__(self, idx):
-        video_path = self.csv['video_path'].values[idx]
-        output_file = self.csv['feature_path'].values[idx]
+    def vidfeat(self):
+        print(self.fname)
+        video_path = self.fname
+        opn = video_path[0:10]
+        opn = opn.replace(r'\.','')
+        opn = opn.replace('\\','')
+        opn = opn.replace(':','')
+        output_file = './Data/'+opn+'op.npy'
         print(video_path,output_file)
         print(os.path.isfile(video_path))
         if not(os.path.isfile(output_file)) and os.path.isfile(video_path):
