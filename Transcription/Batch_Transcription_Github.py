@@ -21,14 +21,14 @@ container_name = 'forlecture' # for example, `test`
 account_name = config.storage_name
 account_key = config.storage_key
 
-video_clip = "Search in an almost sorted array  GeeksforGeeks.mp4"
+video_clip = "../VideoSummarization/Data/videos/Lecture 30-20211028 0641-1.mp4"
 
 clip = mp.VideoFileClip(video_clip)
-blob_name = video_clip[:-3]+'mp3' # for example, `whatstheweatherlike.wav`
+blob_name = video_clip.split("/")[-1][:-3]+'mp3' # for example, `whatstheweatherlike.wav`
 # Insert Local Audio File Path
 
 block_list=[]
-chunk_size=2048
+chunk_size=8192
 
 if not os.path.isfile(blob_name):
     clip.audio.write_audiofile(blob_name)
@@ -41,6 +41,7 @@ blob_client = blob_service_client.get_blob_client(container=container_name, blob
 
 try: 
     blob_client.get_blob_properties()
+    print("File exists")
 except ResourceNotFoundError:
     print("\nUploading to Azure Storage as blob:\n\t" + blob_name)
     with open(blob_name, "rb") as data:
