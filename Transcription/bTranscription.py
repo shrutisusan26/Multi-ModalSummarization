@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 import uuid
 from azure.core.exceptions import ResourceNotFoundError
 from pydub import AudioSegment
+from Transcription.process_transcript import readj
 
 SUBSCRIPTION_KEY = config.api_key
 SERVICE_REGION = "centralindia"
@@ -160,7 +161,8 @@ def transcribe(url_with_sas):
 
         if transcription.status == "Succeeded":
             print("succeeded")
-           
+        
+
             pag_files = api.get_transcription_files(transcription_id)
             for file_data in _paginate(api, pag_files):
                 if file_data.kind != "Transcription":
@@ -171,11 +173,18 @@ def transcribe(url_with_sas):
                 print(results_url)
                 blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
                 blob_client = blob_service_client.get_blob_client(container=container_name, blob=results_url[1][1:])
-                results = blob_client.download_blob().readall()
+                fname = transcription_id+'result.json'
+                dir = r'E:\Multi-Modal Summarization\Data\trans'
+                if not os.path.isdir(dir):
+                    os.makedirs(dir)
+                with open(os.path.join(dir,fname),'wb') as dw:
+                    dw.write(blob_client.download_blob().readall())
+                results = readj(os.path.join(dir,fname))
                 #results = requests.get(results_url)
                 print(results)
                 #logging.info(
-                 #   f"Results for {audiofilename}:\n{results}")
+                 #   f"Results for {audiofilename}:\n:
+                 # {results}")
                 return results
         elif transcription.status == "Failed":
             print("failed")
