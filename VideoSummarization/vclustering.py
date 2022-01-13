@@ -77,9 +77,9 @@ def vsum(ip):
     ordering = [closest[idx].item() for idx in clustering_ordering]
     removed_redundancy = redundancy_checker(ordering,op)
     print('Clustering Finished')
-    cap = cv2.VideoCapture(ip)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    scale = (16/fr)*fps
+    #cap = cv2.VideoCapture(ip)
+    #fps = cap.get(cv2.CAP_PROP_FPS)
+    #scale = (16/fr)*fps
     # for i in ordering:
     #     cap.set(1, i*scale)
     #     ret, frame = cap.read()

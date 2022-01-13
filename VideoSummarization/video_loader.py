@@ -46,7 +46,7 @@ class VideoLoader():
     def vidfeat(self):
         print(self.fname)
         video_path = self.fname
-        opn =ip[0:10]
+        opn =video_path[0:10]
         opn = opn.replace(r'\.','')
         opn = opn.replace('\\','')
         opn = opn.replace(':','')
