@@ -15,9 +15,10 @@ import logging
 #logging.basicConfig(level=logging.INFO)
 import matplotlib.pyplot as plt
 from TextSummarization.baas import generate_sentence_embeddings
-from config.db import conn
-db = conn.Vidsum
+from config.db import conn, start
 
+db = conn.Vidsum
+start()
 
 app = FastAPI()
 origins = [
