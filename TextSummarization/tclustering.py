@@ -7,7 +7,7 @@ from sklearn.metrics import pairwise_distances_argmin_min
 import time
 from TextSummarization.baas import generate_sentence_embeddings
 from transformers import BertTokenizer, BertModel
-
+import json
 
 def req(sentence):
     #body = requests.get("http://localhost:8000/embedding/",params={'sentence': sentence})
