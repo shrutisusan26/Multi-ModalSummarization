@@ -70,12 +70,11 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-VideoSummarization/config.json
+config/
 Data/
 resnext101.pth
 # pyenv
 .python-version
-*.txt
 
 # celery beat schedule file
 celerybeat-schedule
