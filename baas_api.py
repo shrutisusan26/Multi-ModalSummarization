@@ -48,7 +48,7 @@ async def create_upload_file(file: UploadFile = File(...)):
     return {"transcript": transcription, "dpath":destination}
 
 @app.post("/vsummary", response_description="Post path for video summary")
-async def vsum(path: Vidpath):
+async def vsummary(path: Vidpath):
     path = path.dict()
     print(path)
     ordering,fr = vsum(path)

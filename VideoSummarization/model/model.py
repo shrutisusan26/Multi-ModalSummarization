@@ -23,7 +23,9 @@ def get_model():
         sample_duration=16,
         last_fc=False)
     model = model.cuda()
-    model_data = th.load('model/resnext101.pth')
+    dir = os.path.join(os.getcwd(),'VideoSummarization')
+    dir = os.path.join(dir,'model')
+    model_data = th.load(os.path.join(dir,'resnext101.pth'))
     model.load_state_dict(model_data)
     model.eval()
     print('loaded')

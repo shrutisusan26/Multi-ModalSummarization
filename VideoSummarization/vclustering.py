@@ -43,9 +43,9 @@ def clean(dir1,dir2,op):
                 os.remove(os.path.join(j,i))
 
 def vsum(ip):
-    dir1 = os.path.join(os.path.dirname(os.getcwd()),'Data')
+    dir1 = os.path.join(os.getcwd(),'Data')
     dir1 = os.path.join(dir1,'output_images')
-    dir2 = os.path.join(os.path.dirname(os.getcwd()),'Data')
+    dir2 = os.path.join(os.getcwd(),'Data')
     dir2 = os.path.join(dir2,'red')
     if not os.path.isdir(dir1):
         os.makedirs(dir1)
@@ -56,7 +56,9 @@ def vsum(ip):
     opn = opn.replace(r'\.','')
     opn = opn.replace('\\','')
     opn = opn.replace(':','')
-    output_file = './Data/'+opn+'op.npy'
+    opf = os.path.join(os.getcwd(),'Data')
+    output_file = opn+'op.npy'
+    output_file = os.path.join(opf,output_file)
     clean(dir1,dir2,output_file) 
     get_feat(ip,fr)
     print(output_file)
