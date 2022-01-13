@@ -39,7 +39,8 @@ def upload(ip):
     print(blob_name)
     block_list=[]
     chunk_size=8192
-    dir = r'E:\Multi-Modal Summarization\Data\audio'
+    dir = os.path.join(os.path.dirname(os.getcwd()),'Data')
+    dir = os.path.join(dir,'audio')
     if not os.path.isdir(dir):
         os.makedirs(dir)
     if not os.path.isfile(os.path.join(dir,blob_name)):
@@ -174,7 +175,8 @@ def transcribe(url_with_sas):
                 blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
                 blob_client = blob_service_client.get_blob_client(container=container_name, blob=results_url[1][1:])
                 fname = transcription_id+'result.json'
-                dir = r'E:\Multi-Modal Summarization\Data\trans'
+                dir = os.path.join(os.path.dirname(os.getcwd()),'Data')
+                dir = os.path.join(dir,'trans')
                 if not os.path.isdir(dir):
                     os.makedirs(dir)
                 with open(os.path.join(dir,fname),'wb') as dw:

@@ -43,8 +43,14 @@ def clean(dir1,dir2,op):
                 os.remove(os.path.join(j,i))
 
 def vsum(ip):
-    dir1 = r'E:\Multi-Modal Summarization\VideoSummarization\Data\output_images'
-    dir2=  r'E:\Multi-Modal Summarization\VideoSummarization\Data\red'
+    dir1 = os.path.join(os.path.dirname(os.getcwd()),'Data')
+    dir1 = os.path.join(dir1,'output_images')
+    dir2 = os.path.join(os.path.dirname(os.getcwd()),'Data')
+    dir2 = os.path.join(dir2,'red')
+    if not os.path.isdir(dir1):
+        os.makedirs(dir1)
+    if not os.path.isdir(dir2):
+        os.makedirs(dir2)
     fr = getfr(ip)
     opn =ip[0:10]
     opn = opn.replace(r'\.','')

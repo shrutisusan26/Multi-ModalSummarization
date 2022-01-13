@@ -33,7 +33,11 @@ app.add_middleware(
 )
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile = File(...)):
-    destination = os.path.join(r'E:\Multi-Modal Summarization\Data\videos',file.filename)
+    dir = os.path.join(os.getcwd(),'Data')
+    dir = os.path.join(os.getcwd(),'videos')
+    if not os.path.isdir(dir):
+        os.makedirs(dir)
+    destination = os.path.join(dir,file.filename)
     try:
         with open(destination,"wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
