@@ -18,15 +18,12 @@ from Transcription.process_transcript import readj
 SUBSCRIPTION_KEY = config.api_key
 SERVICE_REGION = "centralindia"
 
-#NAME = blob_name[:-3]
 DESCRIPTION = "Lecture Video"
 
 LOCALE = "en-US"
-#RECORDINGS_BLOB_URI = url_with_sas
-# Configre Logging
 logging.basicConfig(stream=sys.stdout, format="%(asctime)s %(message)s", datefmt="%d/%m/%Y %I:%M:%S %p %Z")
 
-container_name = 'forlecture' # for example, `test`
+container_name = 'forlecture'
 account_name = config.storage_name
 account_key = config.storage_key
 blob_name=''
@@ -35,11 +32,11 @@ def upload(ip):
     video_clip =ip
     clip = mp.VideoFileClip(video_clip)
     global blob_name
-    blob_name = video_clip.split("\\")[-1][:-3]+'mp3' # for example, `whatstheweatherlike.wav`
+    blob_name = video_clip.split("\\")[-1][:-3]+'mp3'
     print(blob_name)
     block_list=[]
     chunk_size=8192
-    dir = os.path.join(os.path.dirname(os.getcwd()),'Data')
+    dir = os.path.join(os.getcwd(),'Data')
     dir = os.path.join(dir,'audio')
     if not os.path.isdir(dir):
         os.makedirs(dir)
@@ -75,7 +72,8 @@ def upload(ip):
     sas_token = blob_service.generate_blob_shared_access_signature(container_name, blob_name, permission=BlobPermissions.READ, expiry=datetime.utcnow() + timedelta(hours=1))
     url_with_sas = blob_service.make_blob_url(container_name, blob_name, sas_token=sas_token)
 
-    transcribe(url_with_sas)
+    results = transcribe(url_with_sas)
+    return results
 
 def transcribe_from_single_blob(uri, properties):
     global blob_name
@@ -162,7 +160,6 @@ def transcribe(url_with_sas):
 
         if transcription.status == "Succeeded":
             print("succeeded")
-        
 
             pag_files = api.get_transcription_files(transcription_id)
             for file_data in _paginate(api, pag_files):
@@ -175,18 +172,14 @@ def transcribe(url_with_sas):
                 blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
                 blob_client = blob_service_client.get_blob_client(container=container_name, blob=results_url[1][1:])
                 fname = transcription_id+'result.json'
-                dir = os.path.join(os.path.dirname(os.getcwd()),'Data')
+                dir = os.path.join(os.getcwd(),'Data')
                 dir = os.path.join(dir,'trans')
                 if not os.path.isdir(dir):
                     os.makedirs(dir)
                 with open(os.path.join(dir,fname),'wb') as dw:
                     dw.write(blob_client.download_blob().readall())
                 results = readj(os.path.join(dir,fname))
-                #results = requests.get(results_url)
                 print(results)
-                #logging.info(
-                 #   f"Results for {audiofilename}:\n:
-                 # {results}")
                 return results
         elif transcription.status == "Failed":
             print("failed")

@@ -35,7 +35,7 @@ app.add_middleware(
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile = File(...)):
     dir = os.path.join(os.getcwd(),'Data')
-    dir = os.path.join(os.getcwd(),'videos')
+    dir = os.path.join(dir,'videos')
     if not os.path.isdir(dir):
         os.makedirs(dir)
     destination = os.path.join(dir,file.filename)
@@ -44,10 +44,8 @@ async def create_upload_file(file: UploadFile = File(...)):
             shutil.copyfileobj(file.file, buffer)
     finally:
         transcription = upload(destination)
-        print(transcription)
         file.file.close()
-
-    return {"filename": file.filename}
+    return {"transcript": transcription, "dpath":destination}
 
 @app.post("/vsummary", response_description="Post path for video summary")
 async def vsum(path: Vidpath):
