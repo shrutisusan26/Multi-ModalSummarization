@@ -72,13 +72,9 @@ def gen_summary(sentences):
             n_ordering.append(i-1)
             n_ordering.append(i)
     n_ordering=set(n_ordering)
-    print(n_ordering)
-    print(len(sentences))
     ordering = sorted(list(n_ordering))
-    summary = '.'.join([sentences.values()[idx] for idx in ordering])
-    summary_sentences = dict(filter(lambda sub: sub[1] in n_ordering, sentences.items()))
+    summary_sentences = {j[0]:j[1] for i,j in enumerate(sentences.items()) if i in ordering}
     print('Clustering Finished')
-    print(summary)
     return summary_sentences        
 
 if __name__=="__main__":
