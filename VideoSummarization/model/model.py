@@ -3,6 +3,7 @@ import torch as th
 import torchvision.models as models
 from VideoSummarization.model.resnext import resnet101
 from torch import nn
+import os
 
 
 class GlobalAvgPool(nn.Module):

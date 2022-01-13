@@ -51,7 +51,7 @@ async def create_upload_file(file: UploadFile = File(...)):
 async def vsummary(path: Vidpath):
     path = path.dict()
     print(path)
-    ordering,fr = vsum(path)
+    ordering,fr = vsum(path['path'])
     item={'path':path,'order':ordering,'fr':fr}
     response =  db.Vimage.insert_one(vsummaryEntity(item))
     item['id']= str(response.inserted_id)

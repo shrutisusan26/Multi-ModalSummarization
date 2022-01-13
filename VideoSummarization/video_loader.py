@@ -46,11 +46,13 @@ class VideoLoader():
     def vidfeat(self):
         print(self.fname)
         video_path = self.fname
-        opn = video_path[0:10]
+        opn =ip[0:10]
         opn = opn.replace(r'\.','')
         opn = opn.replace('\\','')
         opn = opn.replace(':','')
-        output_file = './Data/'+opn+'op.npy'
+        opf = os.path.join(os.getcwd(),'Data')
+        output_file = opn+'op.npy'
+        output_file = os.path.join(opf,output_file)
         print(video_path,output_file)
         print(os.path.isfile(video_path))
         if not(os.path.isfile(output_file)) and os.path.isfile(video_path):

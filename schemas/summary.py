@@ -6,7 +6,7 @@ def summaryEntity(item)->dict:
 
 def vsummaryEntity(item)->dict:
         return {
-            "article": item['article'],
+            "path": item['path'],
             'order': item['order'],
             'fr': item['fr']
     
