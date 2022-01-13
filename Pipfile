@@ -15,6 +15,7 @@ ffprobe = "*"
 azure-storage = "*"
 azure-storage-blob = "*"
 opencv-python = "*"
+python-multipart = "*"
 
 [dev-packages]
 

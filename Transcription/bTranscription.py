@@ -3,7 +3,7 @@ import sys
 import requests
 import time
 import swagger_client as cris_client
-import config
+from config import config 
 from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.blob import BlobServiceClient, BlobBlock
 import os
@@ -14,76 +14,71 @@ import uuid
 from azure.core.exceptions import ResourceNotFoundError
 from pydub import AudioSegment
 
+SUBSCRIPTION_KEY = config.api_key
+SERVICE_REGION = "centralindia"
 
+#NAME = blob_name[:-3]
+DESCRIPTION = "Lecture Video"
+
+LOCALE = "en-US"
+#RECORDINGS_BLOB_URI = url_with_sas
 # Configre Logging
 logging.basicConfig(stream=sys.stdout, format="%(asctime)s %(message)s", datefmt="%d/%m/%Y %I:%M:%S %p %Z")
 
 container_name = 'forlecture' # for example, `test`
 account_name = config.storage_name
 account_key = config.storage_key
+blob_name=''
 
-video_clip = "../VideoSummarization/Data/videos/Lecture 30-20211028 0641-1.mp4"
+def upload(ip):
+    video_clip =ip
+    clip = mp.VideoFileClip(video_clip)
+    global blob_name
+    blob_name = video_clip.split("\\")[-1][:-3]+'mp3' # for example, `whatstheweatherlike.wav`
+    print(blob_name)
+    block_list=[]
+    chunk_size=8192
+    dir = r'E:\Multi-Modal Summarization\Data\audio'
+    if not os.path.isdir(dir):
+        os.makedirs(dir)
+    if not os.path.isfile(os.path.join(dir,blob_name)):
+        clip.audio.write_audiofile(os.path.join(dir,blob_name))
+        sound = AudioSegment.from_mp3(os.path.join(dir,blob_name))
+        sound = sound.set_channels(1)
+        sound.export(os.path.join(dir,blob_name), format="mp3")
+    print(blob_name)
+    print(os.path.join(dir,blob_name))    
+    blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
+    blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
 
-clip = mp.VideoFileClip(video_clip)
-blob_name = video_clip.split("/")[-1][:-3]+'mp3' # for example, `whatstheweatherlike.wav`
-# Insert Local Audio File Path
+    try: 
+        blob_client.get_blob_properties()
+        print("File exists")
+    except ResourceNotFoundError:
+        print("\nUploading to Azure Storage as blob:\n\t" + blob_name)
+        with open(os.path.join(dir,blob_name), "rb") as data:
+            while True:
+                read_data = data.read(chunk_size)
+                if not read_data:
+                    break
+                blk_id = str(uuid.uuid4())
+                blob_client.stage_block(block_id=blk_id,data=read_data) 
+                block_list.append(BlobBlock(block_id=blk_id))
+        blob_client.commit_block_list(block_list)
+            
+    blob_service = BaseBlobService(
+        account_name=account_name,
+        account_key=account_key
+    )
+    sas_token = blob_service.generate_blob_shared_access_signature(container_name, blob_name, permission=BlobPermissions.READ, expiry=datetime.utcnow() + timedelta(hours=1))
+    url_with_sas = blob_service.make_blob_url(container_name, blob_name, sas_token=sas_token)
 
-block_list=[]
-chunk_size=8192
-
-if not os.path.isfile(blob_name):
-    clip.audio.write_audiofile(blob_name)
-    sound = AudioSegment.from_mp3(blob_name)
-    sound = sound.set_channels(1)
-    sound.export(blob_name, format="mp3")
-    
-blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
-blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
-
-try: 
-    blob_client.get_blob_properties()
-    print("File exists")
-except ResourceNotFoundError:
-    print("\nUploading to Azure Storage as blob:\n\t" + blob_name)
-    with open(blob_name, "rb") as data:
-        while True:
-            read_data = data.read(chunk_size)
-            if not read_data:
-                break
-            blk_id = str(uuid.uuid4())
-            blob_client.stage_block(block_id=blk_id,data=read_data) 
-            block_list.append(BlobBlock(block_id=blk_id))
-    blob_client.commit_block_list(block_list)
-
-
-        
-blob_service = BaseBlobService(
-    account_name=account_name,
-    account_key=account_key
-)
-
-sas_token = blob_service.generate_blob_shared_access_signature(container_name, blob_name, permission=BlobPermissions.READ, expiry=datetime.utcnow() + timedelta(hours=1))
-url_with_sas = blob_service.make_blob_url(container_name, blob_name, sas_token=sas_token)
-
-# TODO: Paste your keys and URLs into their respective variables
-
-# Your subscription key and region for the speech service
-SUBSCRIPTION_KEY = config.api_key
-SERVICE_REGION = "centralindia"
-
-NAME = blob_name[:-3]
-DESCRIPTION = "Lecture Video"
-
-LOCALE = "en-US"
-RECORDINGS_BLOB_URI = url_with_sas
+    transcribe(url_with_sas)
 
 def transcribe_from_single_blob(uri, properties):
-    """
-    Transcribe a single audio file located at `uri` using the settings specified in `properties`
-    using the base model for the specified locale.
-    """
+    global blob_name
     transcription_definition = cris_client.Transcription(
-        display_name=NAME,
+        display_name=blob_name[:-3],
         description=DESCRIPTION,
         locale=LOCALE,
         content_urls=[uri],
@@ -112,7 +107,7 @@ def _paginate(api, paginated_object):
             raise Exception(
                 f"could not receive paginated data: status {status}")
 
-def transcribe():
+def transcribe(url_with_sas):
     logging.info("Starting transcription client...")
 
     # configure API key authorization: subscription_key
@@ -132,11 +127,11 @@ def transcribe():
     properties = {
         "wordLevelTimestampsEnabled": True,
         "diarizationEnabled": True,
-        "destinationContainerUrl": "https://btspeechtotext.blob.core.windows.net/forlecture?sp=rwl&st=2022-01-12T11:37:16Z&se=2022-01-12T19:37:16Z&spr=https&sv=2020-08-04&sr=c&sig=qxaLZcA16sEF5l0P3Y9cHHVQM7CpGLTkI9yxXIiq9uk%3D", # TODO: Supply SAS URI
+        "destinationContainerUrl": "https://btspeechtotext.blob.core.windows.net/forlecture?sp=rwl&st=2022-01-13T12:19:12Z&se=2022-01-13T20:19:12Z&spr=https&sv=2020-08-04&sr=c&sig=1Rq5NVkqbemky12HeWaIHNpSr9kWb%2F8X7bgCUzjxn%2FM%3D", # TODO: Supply SAS URI
         "timeToLive": "PT1H"
     }
     
-    transcription_definition = transcribe_from_single_blob(RECORDINGS_BLOB_URI, properties)
+    transcription_definition = transcribe_from_single_blob(url_with_sas, properties)
 
     created_transcription, status, headers = api.create_transcription_with_http_info(
         transcription=transcription_definition)
@@ -164,19 +159,30 @@ def transcribe():
             completed = True
 
         if transcription.status == "Succeeded":
+            print("succeeded")
+           
             pag_files = api.get_transcription_files(transcription_id)
             for file_data in _paginate(api, pag_files):
                 if file_data.kind != "Transcription":
                     continue
-
+                global container_name
                 audiofilename = file_data.name
-                results_url = file_data.links.content_url
-                results = requests.get(results_url)
-                logging.info(
-                    f"Results for {audiofilename}:\n{results.content.decode('utf-8')}")
+                results_url = file_data.links.content_url.split(container_name)
+                print(results_url)
+                blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
+                blob_client = blob_service_client.get_blob_client(container=container_name, blob=results_url[1][1:])
+                results = blob_client.download_blob().readall()
+                #results = requests.get(results_url)
+                print(results)
+                #logging.info(
+                 #   f"Results for {audiofilename}:\n{results}")
+                return results
         elif transcription.status == "Failed":
+            print("failed")
             logging.info(
                 f"Transcription failed: {transcription.properties.error.message}")
+            results = 'Failed'
+        
+    
 
-if __name__ == "__main__":
-    transcribe()
+

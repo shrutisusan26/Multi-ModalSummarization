@@ -5,7 +5,7 @@ from sklearn.cluster import KMeans
 import re
 from sklearn.metrics import pairwise_distances_argmin_min
 import time
-from baas import generate_sentence_embeddings
+from TextSummarization.baas import generate_sentence_embeddings
 from transformers import BertTokenizer, BertModel
 
 

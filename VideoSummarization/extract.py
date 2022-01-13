@@ -1,9 +1,9 @@
 import torch as th
 import numpy as np
-from video_loader import VideoLoader
+from VideoSummarization.video_loader import VideoLoader
 from torch.utils.data import DataLoader
-from model.model import get_model
-from preprocessing import Preprocessing
+from VideoSummarization.model.model import get_model
+from VideoSummarization.preprocessing import Preprocessing
 import torch.nn.functional as F
 import gc
 

@@ -1,7 +1,7 @@
 import sys
 import torch as th
 import torchvision.models as models
-from model.resnext import resnet101
+from VideoSummarization.model.resnext import resnet101
 from torch import nn
 
 
