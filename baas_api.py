@@ -8,7 +8,9 @@ from TextSummarization.tclustering import gen_summary, clean
 from VideoSummarization.vclustering import vsum
 from models.summary import Article,Vidpath
 from schemas.summary import summaryEntity,vsummaryEntity
-from Transcription.bTranscription import upload
+from Transcription.bTranscription import upload,getmd
+from cluster_calculation import calc_clusters
+
 from fastapi.middleware.cors import CORSMiddleware
 # OPTIONAL: if you want to have more information on what's happening, activate the logger as follows
 import logging
@@ -43,15 +45,17 @@ async def create_upload_file(file: UploadFile = File(...)):
         with open(destination,"wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     finally:
-        transcription = upload(destination)
+        transcription = upload(destination,db)
+        duration, ofps = getmd(destination)
+        v_clusters,t_clusters = calc_clusters(duration,ofps)
         file.file.close()
-    return {"transcript": transcription, "dpath":destination}
+    return {"transcript": transcription, "dpath":destination, 'v_clusters':v_clusters, 't_clusters':t_clusters}
 
 @app.post("/vsummary", response_description="Post path for video summary")
 async def vsummary(path: Vidpath):
     path = path.dict()
     print(path)
-    ordering,fr,t_chunks = vsum(path['path'])
+    ordering,fr,t_chunks = vsum(path['path'],path['v_clusters'])
     print(ordering,fr)
     item={'path':path,'order':ordering,'fr':fr,'t_chunks':t_chunks}
     response =  db.Vimage.insert_one(vsummaryEntity(item))
@@ -65,7 +69,7 @@ async def summary(article:Article):
     #time_stamps = article['article'].keys()
     #print(time_stamps)
     # = clean(article['article'].values())
-    ordering = gen_summary(article['article'])
+    ordering = gen_summary(article['article'],article['t_clusters'])
     item={'article':article['article'],'order':ordering}
     response =  db.Article.insert_one(summaryEntity(item))
     item['id']= str(response.inserted_id)
