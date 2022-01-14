@@ -1,8 +1,8 @@
 import json
 
 def find_sentence_for_frame(start_time,end_time,sentences):
-    res = {key: val for key, val in filter(lambda sub: int(sub[0]) >= start_time and
-                                   int(sub[0]) <= end_time, sentences.items())}
+    res = {key: val for key, val in filter(lambda sub: int(float(sub[0])) >= start_time and
+                                   int(float(sub[0])) <= end_time, sentences.items())}
     return res
 
 

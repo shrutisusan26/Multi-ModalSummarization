@@ -51,9 +51,9 @@ async def create_upload_file(file: UploadFile = File(...)):
 async def vsummary(path: Vidpath):
     path = path.dict()
     print(path)
-    ordering,fr = vsum(path['path'])
+    ordering,fr,t_chunks = vsum(path['path'])
     print(ordering,fr)
-    item={'path':path,'order':ordering,'fr':fr}
+    item={'path':path,'order':ordering,'fr':fr,'t_chunks':t_chunks}
     response =  db.Vimage.insert_one(vsummaryEntity(item))
     item['id']= str(response.inserted_id)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=item['id'])
@@ -61,29 +61,30 @@ async def vsummary(path: Vidpath):
 @app.post("/summary", response_description="Post article for summary")
 async def summary(article:Article):
     article = article.dict()
-    print(article)
-    article = clean(article['article'])
-    ordering = gen_summary(article)
-    item={'article':article,'order':ordering}
+    #print(article)
+    #time_stamps = article['article'].keys()
+    #print(time_stamps)
+    # = clean(article['article'].values())
+    ordering = gen_summary(article['article'])
+    item={'article':article['article'],'order':ordering}
     response =  db.Article.insert_one(summaryEntity(item))
     item['id']= str(response.inserted_id)
-    summary=[]
-    article=article.split(".")
-    for index in ordering:
-            summary.append(article[index])
-    item['summ']="".join(summary)
-    print(item['order'])
+    #summary=[]
+    #article=article.spli".")c
+    #        summary.append(artie[index])
+    #item['summ']="".join(summary)
+    #print(item['order'])
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=item['id'])
 
-@app.get('/tresult/{id}',response_description="Retrieves the summary", response_model=str)
+@app.get('/tresult/{id}',response_description="Retrieves the summary", response_model=dict)
 async def tresult(id:str):
    if( article := db.Article.find_one({"_id": ObjectId(id)}) ) is not None:
-        return '.'.join([article['article'].split('.')[i] for i in article['order']])
+        return article['order']
    raise HTTPException(status_code=404, detail=f"Article {id} not found")
 
 @app.get('/vresult/{id}',response_description="Retrieves the video images", response_model=dict)
 async def vresult(id:str):
    if( path := db.Vimage.find_one({"_id": ObjectId(id)}) ) is not None:
-        dictionary={'order':path['order'],'fr':path['fr']}
+        dictionary={'order':path['order'],'fr':path['fr'],'t_chunks':path['t_chunks']}
         return dictionary
    raise HTTPException(status_code=404, detail=f"Vimages {id} not found")

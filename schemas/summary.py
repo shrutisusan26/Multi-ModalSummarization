@@ -8,6 +8,7 @@ def vsummaryEntity(item)->dict:
         return {
             "path": item['path'],
             'order': item['order'],
-            'fr': item['fr']
+            'fr': item['fr'],
+            't_chunks': item['t_chunks']
     
         }
