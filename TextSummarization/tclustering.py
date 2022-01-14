@@ -25,8 +25,8 @@ def req(sentence):
     return sentence_embedding['sentence_embedding']
 
 def clean(sentences):
-    sentences = re.sub("\\n","",sentences)
-    return sentences
+    sentences= [re.sub("\\n","",i) for i in sentences.values()]
+    return sentences,
 
 
 def gen_summary(sentences):
@@ -36,7 +36,7 @@ def gen_summary(sentences):
     i = 0
     #rem = len(sentences)%4
     #vectors = []
-    sentence_embed=req(sentences.values())
+    sentence_embed=req(clean(sentences))
     '''
     if rem!=0:
         with Pool(rem) as p:
@@ -46,9 +46,11 @@ def gen_summary(sentences):
             vectors.extend(p.map(req, sentences[i:i+4]))
     '''
     vectors = np.array(sentence_embed)
+    print(vectors.shape)
     end = time.time()
-    print(end-start)
+    print(end-start)    
     n_clusters = int(np.ceil(len(vectors)/8))
+    print(n_clusters)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     kmeans = kmeans.fit(vectors)
     avg = []
@@ -74,22 +76,10 @@ def gen_summary(sentences):
     n_ordering=set(n_ordering)
     ordering = sorted(list(n_ordering))
     summary_sentences = {j[0]:j[1] for i,j in enumerate(sentences.items()) if i in ordering}
+    print(summary_sentences)
     print('Clustering Finished')
     return summary_sentences        
 
-if __name__=="__main__":
-    with open('transcript.json') as f:
-        data = json.load(f)
-
-    phrases = data['recognizedPhrases']
-    sentences = {}
-    transcript = data['combinedRecognizedPhrases'][0]['display']
-
-    for i in phrases:
-        start_time = i['offsetInTicks']//(10**7)
-        sentences[start_time] = i['nBest'][0]['display'] 
-        
-    print(gen_summary(sentences))
 """
     start = time.time()
     with open("data.txt","r") as f:

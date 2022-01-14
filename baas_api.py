@@ -61,24 +61,25 @@ async def vsummary(path: Vidpath):
 @app.post("/summary", response_description="Post article for summary")
 async def summary(article:Article):
     article = article.dict()
-    print(article)
-    article = clean(article['article'])
-    ordering = gen_summary(article)
-    item={'article':article,'order':ordering}
+    #print(article)
+    #time_stamps = article['article'].keys()
+    #print(time_stamps)
+    # = clean(article['article'].values())
+    ordering = gen_summary(article['article'])
+    item={'article':article['article'],'order':ordering}
     response =  db.Article.insert_one(summaryEntity(item))
     item['id']= str(response.inserted_id)
-    summary=[]
-    article=article.split(".")
-    for index in ordering:
-            summary.append(article[index])
-    item['summ']="".join(summary)
-    print(item['order'])
+    #summary=[]
+    #article=article.spli".")c
+    #        summary.append(artie[index])
+    #item['summ']="".join(summary)
+    #print(item['order'])
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=item['id'])
 
-@app.get('/tresult/{id}',response_description="Retrieves the summary", response_model=str)
+@app.get('/tresult/{id}',response_description="Retrieves the summary", response_model=dict)
 async def tresult(id:str):
    if( article := db.Article.find_one({"_id": ObjectId(id)}) ) is not None:
-        return '.'.join([article['article'].split('.')[i] for i in article['order']])
+        return article['order']
    raise HTTPException(status_code=404, detail=f"Article {id} not found")
 
 @app.get('/vresult/{id}',response_description="Retrieves the video images", response_model=dict)

@@ -124,10 +124,11 @@ def transcribe(url_with_sas):
     # Specify transcription properties by passing a dict to the properties parameter. See
     # https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription#configuration-properties
     # for supported parameters.
+    #container_sas_uri="https://btspeechtotext.blob.core.windows.net/forlecture?sp=rwl&st=2022-01-13T12:19:12Z&se=2022-01-13T20:19:12Z&spr=https&sv=2020-08-04&sr=c&sig=1Rq5NVkqbemky12HeWaIHNpSr9kWb%2F8X7bgCUzjxn%2FM%3D"
     properties = {
         "wordLevelTimestampsEnabled": True,
         "diarizationEnabled": True,
-        "destinationContainerUrl": "https://btspeechtotext.blob.core.windows.net/forlecture?sp=rwl&st=2022-01-13T12:19:12Z&se=2022-01-13T20:19:12Z&spr=https&sv=2020-08-04&sr=c&sig=1Rq5NVkqbemky12HeWaIHNpSr9kWb%2F8X7bgCUzjxn%2FM%3D", # TODO: Supply SAS URI
+        "destinationContainerUrl": config.container_sas_uri,
         "timeToLive": "PT1H"
     }
     
