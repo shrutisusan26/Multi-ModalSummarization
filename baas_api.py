@@ -81,8 +81,9 @@ async def tresult(id:str):
         return '.'.join([article['article'].split('.')[i] for i in article['order']])
    raise HTTPException(status_code=404, detail=f"Article {id} not found")
 
-@app.get('/vresult/{id}',response_description="Retrieves the video images", response_model=str)
+@app.get('/vresult/{id}',response_description="Retrieves the video images", response_model=dict)
 async def vresult(id:str):
-   if( path := db.Vimages.find_one({"_id": ObjectId(id)}) ) is not None:
-        return ''.join(i for i in path['order'])
+   if( path := db.Vimage.find_one({"_id": ObjectId(id)}) ) is not None:
+        dictionary={'order':path['order'],'fr':path['fr']}
+        return dictionary
    raise HTTPException(status_code=404, detail=f"Vimages {id} not found")
