@@ -64,7 +64,7 @@ def vsum(ip):
     print(output_file)
     op = np.load(output_file)
     print(op.shape)
-    n_clusters = max(5,op.shape[0]//10)
+    n_clusters = max(5,op.shape[0]//30)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     kmeans = kmeans.fit(op)
     avg = []
@@ -91,5 +91,5 @@ def vsum(ip):
     #     ret, frame = cap.read()
     #     fname=r'E:\Multi-Modal Summarization\VideoSummarization\Data\red\pic'+str(i)+".jpg"
     #     cv2.imwrite(fname, frame)
-    return ordering,fr
+    return ordering,fr,op.shape[0]
 

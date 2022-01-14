@@ -26,7 +26,7 @@ def req(sentence):
 
 def clean(sentences):
     sentences= [re.sub("\\n","",i) for i in sentences.values()]
-    return sentences,
+    return sentences
 
 
 def gen_summary(sentences):
@@ -36,7 +36,7 @@ def gen_summary(sentences):
     i = 0
     #rem = len(sentences)%4
     #vectors = []
-    sentence_embed=req(clean(sentences))
+    sentence_embed=req(sentences.values())
     '''
     if rem!=0:
         with Pool(rem) as p:

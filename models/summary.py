@@ -8,3 +8,4 @@ class Vidpath(BaseModel):
     path: str = Field(...)
     order: Optional[ List[int] ] = None
     fr: Optional[int] = None
+    t_chunks: Optional[int] = None

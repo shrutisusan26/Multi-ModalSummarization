@@ -51,9 +51,9 @@ async def create_upload_file(file: UploadFile = File(...)):
 async def vsummary(path: Vidpath):
     path = path.dict()
     print(path)
-    ordering,fr = vsum(path['path'])
+    ordering,fr,t_chunks = vsum(path['path'])
     print(ordering,fr)
-    item={'path':path,'order':ordering,'fr':fr}
+    item={'path':path,'order':ordering,'fr':fr,'t_chunks':t_chunks}
     response =  db.Vimage.insert_one(vsummaryEntity(item))
     item['id']= str(response.inserted_id)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=item['id'])
@@ -85,6 +85,6 @@ async def tresult(id:str):
 @app.get('/vresult/{id}',response_description="Retrieves the video images", response_model=dict)
 async def vresult(id:str):
    if( path := db.Vimage.find_one({"_id": ObjectId(id)}) ) is not None:
-        dictionary={'order':path['order'],'fr':path['fr']}
+        dictionary={'order':path['order'],'fr':path['fr'],'t_chunks':path['t_chunks']}
         return dictionary
    raise HTTPException(status_code=404, detail=f"Vimages {id} not found")
