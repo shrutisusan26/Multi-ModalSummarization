@@ -29,7 +29,7 @@ def clean(sentences):
     return sentences
 
 
-def gen_summary(sentences):
+def gen_summary(sentences,n_clusters):
     start = time.time()
     # sentences = sentences.split(".")
     # sentences = [token.strip() for token in sentences if token!='']
@@ -49,7 +49,6 @@ def gen_summary(sentences):
     print(vectors.shape)
     end = time.time()
     print(end-start)    
-    n_clusters = int(np.ceil(len(vectors)/8))
     print(n_clusters)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     kmeans = kmeans.fit(vectors)

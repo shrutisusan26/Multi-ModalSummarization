@@ -42,7 +42,7 @@ def clean(dir1,dir2,op):
                 #os.remove(j+"\\"+i)
                 os.remove(os.path.join(j,i))
 
-def vsum(ip):
+def vsum(ip,n_clusters):
     dir1 = os.path.join(os.getcwd(),'Data')
     dir1 = os.path.join(dir1,'output_images')
     dir2 = os.path.join(os.getcwd(),'Data')
@@ -64,7 +64,6 @@ def vsum(ip):
     print(output_file)
     op = np.load(output_file)
     print(op.shape)
-    n_clusters = max(5,op.shape[0]//30)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     kmeans = kmeans.fit(op)
     avg = []
