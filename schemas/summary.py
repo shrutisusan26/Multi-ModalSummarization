@@ -12,3 +12,8 @@ def vsummaryEntity(item)->dict:
             't_chunks': item['t_chunks']
     
         }
+def transEntity(item)->dict:
+        return {
+            "transcription_id": item['transcription_id'],
+            'blob_name': item['blob_name']
+        }

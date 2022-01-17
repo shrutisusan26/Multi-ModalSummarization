@@ -13,7 +13,9 @@ from datetime import datetime, timedelta
 import uuid
 from azure.core.exceptions import ResourceNotFoundError
 from pydub import AudioSegment
+from schemas.summary import transEntity
 from Transcription.process_transcript import readj
+import cv2
 
 SUBSCRIPTION_KEY = config.api_key
 SERVICE_REGION = "centralindia"
@@ -28,7 +30,13 @@ account_name = config.storage_name
 account_key = config.storage_key
 blob_name=''
 
-def upload(ip):
+def getmd(ip):
+    cap = cv2.VideoCapture(ip)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    dur = cap.get(cv2.CAP_PROP_FRAME_COUNT)/fps
+    return dur, fps
+
+def upload(ip,db):
     video_clip =ip
     clip = mp.VideoFileClip(video_clip)
     global blob_name
@@ -53,6 +61,7 @@ def upload(ip):
     try: 
         blob_client.get_blob_properties()
         print("File exists")
+
     except ResourceNotFoundError:
         print("\nUploading to Azure Storage as blob:\n\t" + blob_name)
         with open(os.path.join(dir,blob_name), "rb") as data:
@@ -72,7 +81,7 @@ def upload(ip):
     sas_token = blob_service.generate_blob_shared_access_signature(container_name, blob_name, permission=BlobPermissions.READ, expiry=datetime.utcnow() + timedelta(hours=1))
     url_with_sas = blob_service.make_blob_url(container_name, blob_name, sas_token=sas_token)
 
-    results = transcribe(url_with_sas)
+    results = transcribe(url_with_sas,blob_name,db)
     return results
 
 def transcribe_from_single_blob(uri, properties):
@@ -107,86 +116,90 @@ def _paginate(api, paginated_object):
             raise Exception(
                 f"could not receive paginated data: status {status}")
 
-def transcribe(url_with_sas):
+def transcribe(url_with_sas,blob_name,db):
     logging.info("Starting transcription client...")
 
-    # configure API key authorization: subscription_key
+        # configure API key authorization: subscription_key
     configuration = cris_client.Configuration()
     configuration.api_key["Ocp-Apim-Subscription-Key"] = SUBSCRIPTION_KEY
     configuration.host = f"https://{SERVICE_REGION}.api.cognitive.microsoft.com/speechtotext/v3.0"
 
-    # create the client object and authenticate
+        # create the client object and authenticate
     client = cris_client.ApiClient(configuration)
 
-    # create an instance of the transcription api class
+        # create an instance of the transcription api class
     api = cris_client.DefaultApi(api_client=client)
+    if(transcription_id := db.trans.find_one({"blob_name": blob_name}) is None):
+        # Specify transcription properties by passing a dict to the properties parameter. See
+        # https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription#configuration-properties
+        # for supported parameters.
+        #container_sas_uri="https://btspeechtotext.blob.core.windows.net/forlecture?sp=rwl&st=2022-01-13T12:19:12Z&se=2022-01-13T20:19:12Z&spr=https&sv=2020-08-04&sr=c&sig=1Rq5NVkqbemky12HeWaIHNpSr9kWb%2F8X7bgCUzjxn%2FM%3D"
+        properties = {
+            "wordLevelTimestampsEnabled": True,
+            "diarizationEnabled": True,
+            "destinationContainerUrl": config.container_sas_uri,
+            "timeToLive": "PT1H"
+        }
+        
+        transcription_definition = transcribe_from_single_blob(url_with_sas, properties)
 
-    # Specify transcription properties by passing a dict to the properties parameter. See
-    # https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription#configuration-properties
-    # for supported parameters.
-    #container_sas_uri="https://btspeechtotext.blob.core.windows.net/forlecture?sp=rwl&st=2022-01-13T12:19:12Z&se=2022-01-13T20:19:12Z&spr=https&sv=2020-08-04&sr=c&sig=1Rq5NVkqbemky12HeWaIHNpSr9kWb%2F8X7bgCUzjxn%2FM%3D"
-    properties = {
-        "wordLevelTimestampsEnabled": True,
-        "diarizationEnabled": True,
-        "destinationContainerUrl": config.container_sas_uri,
-        "timeToLive": "PT1H"
-    }
-    
-    transcription_definition = transcribe_from_single_blob(url_with_sas, properties)
+        created_transcription, status, headers = api.create_transcription_with_http_info(
+            transcription=transcription_definition)
 
-    created_transcription, status, headers = api.create_transcription_with_http_info(
-        transcription=transcription_definition)
+        # get the transcription Id from the location URI
+        transcription_id = headers["location"].split("/")[-1]
 
-    # get the transcription Id from the location URI
-    transcription_id = headers["location"].split("/")[-1]
+        # Log information about the created transcription. If you should ask for support, please
+        # include this information.
+        logging.info(
+            f"Created new transcription with id '{transcription_id}' in region {SERVICE_REGION}")
 
-    # Log information about the created transcription. If you should ask for support, please
-    # include this information.
-    logging.info(
-        f"Created new transcription with id '{transcription_id}' in region {SERVICE_REGION}")
+        logging.info("Checking status.")
 
-    logging.info("Checking status.")
+        completed = False
 
-    completed = False
-
-    while not completed:
+        while not completed:
         # wait for 5 seconds before refreshing the transcription status
-        time.sleep(5)
+            time.sleep(5)
 
-        transcription = api.get_transcription(transcription_id)
-        logging.info(f"Transcriptions status: {transcription.status}")
+            transcription = api.get_transcription(transcription_id)
+            logging.info(f"Transcriptions status: {transcription.status}")
 
-        if transcription.status in ("Failed", "Succeeded"):
-            completed = True
-
-        if transcription.status == "Succeeded":
-            print("succeeded")
-
-            pag_files = api.get_transcription_files(transcription_id)
-            for file_data in _paginate(api, pag_files):
-                if file_data.kind != "Transcription":
-                    continue
-                global container_name
-                audiofilename = file_data.name
-                results_url = file_data.links.content_url.split(container_name)
-                print(results_url)
-                blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
-                blob_client = blob_service_client.get_blob_client(container=container_name, blob=results_url[1][1:])
-                fname = transcription_id+'result.json'
-                dir = os.path.join(os.getcwd(),'Data')
-                dir = os.path.join(dir,'trans')
-                if not os.path.isdir(dir):
-                    os.makedirs(dir)
-                with open(os.path.join(dir,fname),'wb') as dw:
-                    dw.write(blob_client.download_blob().readall())
-                results = readj(os.path.join(dir,fname))
-                print(results)
-                return results
-        elif transcription.status == "Failed":
-            print("failed")
-            logging.info(
-                f"Transcription failed: {transcription.properties.error.message}")
-            results = 'Failed'
+            if transcription.status in ("Failed", "Succeeded"):
+                completed = True
+                item={'transcription_id':transcription_id,'blob_name':blob_name}
+                db.trans.insert_one(transEntity(item))
+    else:
+        transcription_id = db.trans.find_one({"blob_name": blob_name})
+        transcription_id = transcription_id['transcription_id']
+    transcription = api.get_transcription(transcription_id)
+    if transcription.status == "Succeeded":
+        print("succeeded")
+        pag_files = api.get_transcription_files(transcription_id)
+        for file_data in _paginate(api, pag_files):
+            if file_data.kind != "Transcription":
+                continue
+            global container_name
+            audiofilename = file_data.name
+            results_url = file_data.links.content_url.split(container_name)
+            print(results_url)
+            blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
+            blob_client = blob_service_client.get_blob_client(container=container_name, blob=results_url[1][1:])
+            fname = transcription_id+'result.json'
+            dir = os.path.join(os.getcwd(),'Data')
+            dir = os.path.join(dir,'trans')
+            if not os.path.isdir(dir):
+                os.makedirs(dir)
+            with open(os.path.join(dir,fname),'wb') as dw:
+                dw.write(blob_client.download_blob().readall())
+            results = readj(os.path.join(dir,fname))
+            print(results)
+            return results
+    elif transcription.status == "Failed":
+        print("failed")
+        logging.info(f"Transcription failed: {transcription.properties.error.message}")
+        results = 'Failed'
+        return results
         
     
 
