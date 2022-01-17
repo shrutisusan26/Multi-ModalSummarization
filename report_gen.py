@@ -25,9 +25,23 @@ def report_gen(report_dic,ip,fr):
                 print("ERR")
             fname=r'E:\Multi-Modal Summarization\Data\output_images\pic'+str(i)+".jpg"
             cv2.imwrite(fname, frame)
+<<<<<<< HEAD
             im = Image(fname, 2*inch, 5*inch)
+=======
+            im = Image(fname, 5*inch, 2*inch)
+>>>>>>> 4dfbdabd64322c9389ff0f48949f28c52b7ac3bd
             Story.append(im)
-            Story.append(Paragraph(report_dic[i], styles["Normal"]))
+            Story.append(Spacer(1, 12))
+            val = report_dic[i]
+            if val!={}:
+                summ = ''
+                for time,sent in val.items():
+                #print(sent)
+                    summ+=sent
+            else:
+                summ = ''
+            #(str(key)+' : '+ summ)
+            Story.append(Paragraph(summ, styles["Normal"]))
             Story.append(Spacer(1, 12))
         except:
             print("no")
