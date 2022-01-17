@@ -1,5 +1,10 @@
+import imp
 from Transcription.process_transcript import find_sentence_for_frame
 import cv2
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.rl_config import defaultPageSize
+from report_gen import  report_gen
 def combine_summaries(sentences,chunks,fr,t_chunk):
     scale = (16/fr)
     chunk_summary = {}
@@ -9,121 +14,203 @@ def combine_summaries(sentences,chunks,fr,t_chunk):
         end_time = (chunks[i+1])*scale
         #print(start_time, end_time)
         chunk_summary[chunks[i]] = find_sentence_for_frame(start_time,end_time,sentences)
+        s = list(chunk_summary.keys())[0]
+        e = list(chunk_summary.keys())[-1]
     if chunks[0]!=0:
         start_time = 0
         end_time = (chunks[0])*scale
-        chunk_summary[chunks[0]]= {**find_sentence_for_frame(start_time,end_time,sentences),**chunk_summary[chunks[0]]}
+        chunk_summary[s]= {**find_sentence_for_frame(start_time,end_time,sentences),**chunk_summary[s]}
     if chunks[-1]!=t_chunk:
         start_time = chunks[-1]*scale
         end_time = (t_chunk)*scale
-        chunk_summary[chunks[0]]= {**find_sentence_for_frame(start_time,end_time,sentences),**chunk_summary[chunks[0]]}
+        chunk_summary[e]= {**find_sentence_for_frame(start_time,end_time,sentences),**chunk_summary[e]}
     return chunk_summary
 
 if __name__=="__main__":
-    ip = r'E:\Multi-Modal Summarization\Data\videos\Keynesian economics _ Aggregate demand and aggregate supply _ Macroeconomics _ Khan Academy.mp4s'
+    ip = r'E:\Multi-Modal Summarization\Data\videos\yt1s.com - Escaping the Local Optimum of Low Expectation.mp4'
+    PAGE_WIDTH = defaultPageSize[0]
     sentences ={
-    "91.0": "So I'm going to use aggregate demand and aggregate supply in both.",
-    "94.0": "So this is classical.",
-    "99.0": " This is price this right over here is real GDP real GDP? And I'm going to do it for the Keynesian case as well.",
-    "150.5": " Sometimes it'll be referred to that and saying look all prices.",
-    "159.0": "Prices and money.",
-    "164.0": " They're just facilitating transactions and you go to work and you get paid and all that, but then you go and use that money to go buy other things that the economy produces, like food and shelter and transportation.",
-    "174.0": " But the economy in theory based on how many people it has, what kind of technology it has, what it's productive, what kind of factories it has, what kind of natural resources it has.",
-    "179.0": " It's just going to produce what it's going to produce, and if you were to just change aggregate demand.",
-    "184.0": " If the government, let's say.",
-    "213.0": " And there's multiple ways you could have shifted that aggregate demand curve to the right.",
-    "221.0": "You could have fiscal policy where the government, maybe it holds, it's maybe it holds its tax revenue constant, but it increases spending or it goes the other way around.",
-    "227.0": " It does not decrease, it doesn't change its spending, but it lowers tax revenue.",
-    "261.66666666666663": " And Keynes did not disagree with that, but he's sitting here in the middle of the Great Depression and saying, look all of a sudden people are poor.",
-    "266.99999999999994": " In the 1930s factories did not get blown up.",
-    "272.33333333333326": " People didn't disappear.",
-    "293.6666666666667": " They could work and produce the wealth that could then be distributed to society, but it's no ones demanding for them to do it, so he suspected, well, something weird was happening with aggregate demand, especially in the short run.",
-    "304.33333333333337": " So in a very pure, very very very short run model, I know we have talked about kind of a short run aggregate supply curve that is upward sloping, so something that might look something that might look something like that and that is actually starting to put some of the Keynesian ideas into practice.",
-    "315.0": "And what I like to think of is kind of something in between, but if you think in the very very very very short term, Keynes would say well prices are going to be very sticky, so especially especially showing the short run.",
-    "346.9999999999999": " You want factories to operate faster.",
-    "350.3333333333332": " People are going to start, and the utilization is high.",
-    "353.6666666666665": " People are going to start charging and more and more.",
-    "361.0": " If my factory is at 30% utilization and someone wants to buy a little bit more, that's not that I'm that I'm going to say, hey, I'm going to raise prices on you.",
-    "365.0": " I'll say yeah, this exact same price.",
-    "369.0": " Yeah, you want another 5% of my factory to be utilized.",
-    "377.0": " So in the very short run it kind of has the opposite view of the aggregate supply curve.",
-    "381.0": " Then the classical model it says at any level of GDP in the short run, prices won't be affected.",
-    "385.0": "It won't be affected, and so in this model, right over here.",
-    "431.0": " You essentially deficit spending some way without maybe holding taxes constant, but the government spending more whatever shift the curve to the right and that might be a way that might be a way to increase the overall output and canes.",
-    "438.5": " Real realization was that look.",
-    "446.0": "The classical economists would tell you if you have a free and unfettered market.",
-    "451.1666666666667": " The economy will just get to its natural, very efficient state.",
-    "456.33333333333337": " And Kane says yes, that is sometimes true, but that's sometimes not true, and we'll talk about different cases and by no means do I think the Keynesian model is the ideal.",
-    "461.50000000000006": " And I don't think even Keynes would have thought the Keynesian model describes everything depends on the circumstance.",
-    "484.5": " See is just all of a sudden got a little bit pessimistic, had a bad dream, woke up on the wrong side of the bed, and said you know what? I'm not feeling so good about the economy.",
-    "492.0": " I'm going to hold off for my purchase from B instead of two units.",
-    "499.5": " I'm going to purchase one unit.",
-    "607.8571428571429": " Let's say that this is the absolute theoretical maximum output.",
-    "612.2857142857143": " If everyone in the country isn't sleeping, the factories are just being run to the ground.",
-    "616.7142857142858": " That's the absolute theoretical output.",
-    "621.1428571428572": " And let's say that this is it's potential, just a healthy state where the economy might be operating.",
-    "625.5714285714287": " The real kind of.",
-    "630.0": "Medium run supply curve or short run supply aggregate supply curve, so this is aggregate supply in the very long run.",
-    "634.0": " So this is in the long run aggregate supply.",
-    "638.0": " The best model would be something that's in between.",
-    "662.4000000000001": " We have a lot of excess capacity, and now the Keynesian ideas seem.",
-    "668.6000000000001": " Maybe they'll make sense.",
-    "674.8000000000002": " Maybe there should be out some outside stimulus happening."
-    }
+  "38.0": "Few are those who see with their own eyes and feel with their own hearts.",
+  "44.0": "Now wait that that actually was Albert Einstein.",
+  "48.0": " Different different due similar haircut for those.",
+  "52.0": "Similar, you know there's a.",
+  "65.5": " It actually goes on to say.",
+  "70.0": "So that he may never discover how much he loves steak or vegetarian lasagna.",
+  "74.0": " For those of you who are vegetarian in the audience.",
+  "101.33333333333334": " There's a voice inside of you that whispers all day long.",
+  "106.50000000000001": " I feel that this is right for me.",
+  "111.66666666666669": " I know that this is wrong.",
+  "138.0": "Over two small topics, life and artificial intelligence.",
+  "145.0": "Now.",
+  "146.0": "From an optimization perspective.",
+  "150.0": "And one of my Co advisors has always told me when you show a plot you have to describe the X axis and the Y axis as a good engineer.",
+  "154.0": " There you go.",
+  "158.0": " That's less than #1.",
+  "162.0": " The X axis is competence, the Y axis is confidence.",
+  "166.0": "And there's there's something called the Dunning Kruger effect, which is captured by this plot, and that is at the beginning of your journey of competence when you're not very good at something when you're first taking the first steps of learning something is some of you here are in the engineering fields, you're overly confident it's the peak of confidence, and you're at the lowest stage of actually of your abilities of your expertise, and it's funny.",
+  "196.0": "That I am speaking here before you today.",
+  "288.0": "Which is after the peak of confidence and the value of despair.",
+  "296.0": " There's a gradient provided to you by your advisors, by your parents, by your friends, your loved ones, society in general, the gradient over which you're optimized to achieve a some definition of success.",
+  "304.0": " This is what I call the local optimum.",
+  "320.0": "Yearly and for the rest of your life, tells you what the definition of success is.",
+  "329.3333333333333": " That's the local optimum.",
+  "338.66666666666663": " What I'd like to argue is some ideas of how to break out of that Convention of how to listen just enough to hear the lessons in society, advises friends and parents, but for the rest of it, ignore their voices and only listen to your own voice.",
+  "415.0": "For me, that's understanding the human mind and engineering.",
+  "419.0": "Artificial intelligence systems.",
+  "424.0": "Visualized on the left here is just 3% of the neurons in the human brain.",
+  "470.0": " That's my research work is focused on most of the work at MIT, and before that has been our robotics and autonomous vehicles.",
+  "474.5": " But now the dream is to create a system that you can love and it can love you back.",
+  "479.0": "A brief history of artificial intelligence to give you a sense to give you a quick review of this is a totally new field.",
+  "596.0": "Was able to defeat.",
+  "599.0": "The greatest player in the world.",
+  "602.5555555555555": " Little side note.",
+  "640.5": " If you wanna have an impact as an engineer, autonomous vehicles is the space you will do so in the next in the twenty 20s.",
+  "650.0": "And now Greg Quick whirlwind overview of key ideas in artificial intelligence that were key breakthroughs, so neural networks and perceptron.",
+  "660.0": " Like I said, was born in the 40s, fifties and 60s with the algorithms that dominate today's world of deep learning.",
+  "789.0": "Is the idea?",
+  "791.0": "You know there's a.",
+  "795.0": " There's a concept of Big Bang for the start of the universe.",
+  "799.0": " A silly name for one of the most incredible mysteries of our human existence.",
+  "803.0": " Same way self play is one of the silliest names for one of the most powerful ideas in artificial intelligence.",
+  "823.0": "That you explore.",
+  "826.0": "So the open problems in artificial intelligence and possible solutions and one of the things and I'll focus on #4, which is something that I am that is my dream that is sort of my.",
+  "840.0": "Life aspiration, but I'll give a worldwind introduction, learning to understand learning, to act, reason, and a deep connection between humans and AI systems, so learning to understand there's a lot of exciting possibilities here.",
+  "889.0": "Now that's all good, but to solve real world problems, you have to.",
+  "894.0": " Actually you have to deal with endless edge cases that we human beings.",
+  "899.0": "Effortlessly take care of that.",
+  "905.75": " Our ability to do reasoning and common sense reasoning effortlessly takes care of, so be able to learn overall those edge case you have to do much larger scale learning, and for that you have to be much more selective and clever about which data you annotate with human beings.",
+  "912.5": " And that's the idea of active learning.",
+  "919.25": " Same way with as children we explore the world we interact with the world to pick up the lessons from it.",
+  "926.0": "The same way you can interact with the data set to select only small parts of it to learn from, and I'll take Tesla, which is a car company that's using autonomous driving and it's system autopilot that uses deep learning to learn.",
+  "942.0": "To solve all these different problems, I'll use them as a case study.",
+  "947.6666666666666": " What they're doing is quite interesting in the space of active learning, they're creating a pipeline for each individual task.",
+  "962.0": "Its own data set.",
+  "964.0": "And there's a machine learning system that learns from that data set.",
+  "968.0": "And is then deployed back into the vehicles and when the vehicle fails in a particular case, that's an edge case that's marked for the system and is brought back to the pipeline to annotate.",
+  "983.0": "So there is ongoing pipeline that continuously goes on.",
+  "991.0": " The system is not very good in the beginning, but the whole purpose of it is to discover edge cases in the same way that human us humans learn something and you can think of our actually existence in the world as an edge case discovery mechanism.",
+  "999.0": " So you learn something, you construct a mental model of the world and you move about the world until you run up against the case.",
+  "1058.5": " Again, no human supervision.",
+  "1063.0": "And.",
+  "1064.0": "Through randomization you have other systems that also know nothing but know a different set of nothing.",
+  "1182.0": "Dog intelligence system.",
+  "1185.0": "Solving a particular problem so we know nothing how to do about how to do reasoning systems in artificial intelligence.",
+  "1190.5": " This is the.",
+  "1234.0": "That we we learn, and we accumulate in a knowledge base.",
+  "1239.5": " This process is a really exciting area of research that nobody knows what to do with.",
+  "1245.0": "The things I've described previously don't really have anything to do with humans necessarily.",
+  "1309.5": " There's you human that are tasked with.",
+  "1317.0": "Sitting there and supervising the machine, and there is an AI system in the middle that manages that and manages the tension in the dynasty uncertainty.",
+  "1323.0": " The human that all the the keyword, the trust, all the mess of human beings, and manages that.",
+  "1329.0": " That's a really exciting space.",
+  "1335.0": "That is, in the very early days what I show there.",
+  "1426.0": "It's I believe it'll be obvious in retrospect, how much opportunity there is to learn about human beings from the devices, and from that to form a deep, meaningful connection.",
+  "1439.0": "So now to return.",
+  "1441.0": "To my value of despair.",
+  "1450.0": "So in this context, in this optimization context.",
+  "1454.0": "My first piece of advice is to listen to your inner voice.",
+  "1459.0": "I think a lot of people, including a lot of very smart professors, advisors, parents, friends.",
+  "1519.0": "And if that means taking a few detours.",
+  "1522.0": "Take the detours.",
+  "1525.0": "Again, this is coming from the valley of despair.",
+  "1588.0": " Starting a podcast.",
+  "1590.0": "Advice #3 is to measure.",
+  "1594.0": "Measure passion, not progress.",
+  "1597.0": "Some most of us get an average of about 27,000 days of life.",
+  "1603.0": "I think a good metric by which you should live.",
+  "1607.0": "Is to maximize the number of those days that are filled with a passionate pursuit of something.",
+  "1645.0": "But the people who love you, the people who care for you.",
+  "1650.0": "Like like I mentioned your friends your family.",
+  "1653.0": "Should not be trusted.",
+  "1681.0": "And since society will tell you to be to find balance, work life balance in your life.",
+  "1687.0": "Because passion looks unhealthy.",
+  "1693.0": "Advice #4",
+  "1700.0": " Make a habit of working hard every day.",
+  "1705.0": "Putting in the hours.",
+  "1708.0": "There's a lot of books and a lot of advice have been written on working smart and not working hard.",
+  "1715.0": "I'm yet to meet anyone.",
+  "1718.0": "Who has not truly worked hard for thousands of hours in order to accomplish something great?",
+  "1745.0": "You have to love what you do.",
+  "1747.0": "And the final piece of advice.",
+  "1749.0": "I love that picture.",
+  "1754.0": " OK, it's to look up to the stars and appreciate every single moment you're alive at the mystery of this world at the at.",
+  "1759.0": " The beauty of this world.",
+  "1764.0": " Again, this is my perspective.",
+  "1832.0": "Is.",
+  "1834.0": "Is the thing that makes life worthwhile?",
+  "1839.0": "And that is to me happiness.",
+  "1844.0": "So with those silly few pieces of advice, I'd like to continue on a gratitude and say thank you.",
+  "1848.25": " Thank you to my advisor.",
+  "1852.5": " Thank you to this university for giving me a helping hand.",
+  "1856.75": " There you go.",
+  "1864.6666666666667": " Thank you for their love.",
+  "1868.3333333333335": " I appreciate it.",
+  "1872.0": "I've never been introduced with this much energy.",
+  "1878.0": "You're hanging at the wrong places.",
+  "1881.0": "Yes.",
+  "1885.0": "Big fan of your lectures.",
+  "1887.6666666666667": " Big fan of the podcast.",
+  "1933.6666666666665": " So colonizing Mars.",
+  "1937.0": "Is like that's what that's like.",
+  "1943.5": " One of the most exciting things we human beings can do.",
+  "1956.0": "For me.",
+  "1958.0": "Like if I were to psychoanalyze myself, there's something in me that's deeply fulfilling about creating.",
+  "1965.0": "Intelligent systems.",
+  "2027.75": " Maybe like French cuisine you have to like cleanse the palate.",
+  "2031.5": " It's a good question to ask.",
+  "2035.25": " Like we're now we're not now talking about the latest paper we're now talking about the bigger questions of life.",
+  "2039.0": "That the simulation question is is a nice way to do that in terms of actually practically.",
+  "2045.0": "I think it's.",
+  "2047.0": "There's 2 interesting things to say, so one it's interesting to me.",
+  "2052.0": " I'm a big fan of virtual reality I love.",
+  "2057.0": "I love the war.",
+  "2063.25": " I love entering worlds, even primitive as they are now that are virtual.",
+  "2069.5": " I can already imagine that more and more people would want to live in those worlds.",
+  "2075.75": " And it's an interesting question to me.",
+  "2173.0": "They get really.",
+  "2174.5": " They get angry actually.",
+  "2176.0": "So.",
+  "2177.0": "I want to say.",
+  "2178.0": "Oh yeah.",
+  "2183.0": "So.",
+  "2184.0": "People talk about athletes and academics being the greatest of their field.",
+  "2187.0": " People consider just the elements to be one of the greatest runners of all time.",
+  "2193.0": " Today, people consider scientists like Isaac.",
+  "2196.0": "Newton",
+  "2197.0": "on the greatest science ever because of his advancements in class mechanics and calculus, which considered pretty basic physics analogies. What do you define greatness?",
+  "2301.0": "Developed by Pythagoras.",
+  "2306.0": "I read it on Wikipedia.",
+  "2311.75": " I don't know if it's true, but you know that's that's that's an example of somebody I at least thought it was kind of an actual entity, an actual human being that was great and associated with this idea.",
+  "2317.5": " So to me, I think greatness is doing the things you love and the rest is just luck.",
+  "2323.25": " Whether they tell a good story by you or not."
+}
     chunks =  [
-    4,
-    29,
-    78,
-    55,
-    65,
-    97,
-    119,
-    138,
-    238,
-    277,
-    343,
+    14,
+    23,
+    67,
+    48,
+    5,
+    107,
+    123,
+    144,
+    194,
+    214,
+    372,
+    291,
+    305,
+    299,
     429,
-    449,
-    495,
-    564,
-    592,
-    603,
-    593,
-    606,
-    618,
-    662,
-    678,
-    687,
-    704
+    319,
+    388,
+    461,
+    462,
+    466,
+    480,
+    581,
+    587
   ]
-    fr= 16
-    t_chunk = 724
+    
+    fr= 4
+    t_chunk = 589
     report_dic = combine_summaries(sentences,chunks,fr,t_chunk)
-    frames = report_dic.keys()
-    cap = cv2.VideoCapture(ip)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    #print(fps)
-    scale = float(16*fps/fr)
-    for i in frames:
-        try:
-            #print(i*scale)
-            cap.set(1, i*scale)
-            ret, frame = cap.read()
-            if not ret:
-                print("ERR")
-            fname=r'E:\Multi-Modal Summarization\Data\output_images\pic'+str(i)+".jpg"
-            cv2.imwrite(fname, frame)
-        except:
-            print("no")
-
-    for key,val in report_dic.items():
-        summ=''
-        #print(val)
-        if val!={}:
-            summ = ''
-            for time,sent in val.items():
-                #print(sent)
-                summ+=sent
-            print(str(key)+' : '+ summ)
-        else:
-            print(str(key))
+    report_gen(report_dic,ip,fr)

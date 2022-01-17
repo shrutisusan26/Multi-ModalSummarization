@@ -62,7 +62,8 @@ def gen_summary(sentences,n_clusters):
     ordering = [closest[idx].item() for idx in clustering_ordering]
     n_ordering =[]
     for i in ordering:
-        if i!=0 and i!=len(sentences)-1:
+        
+        if i!=1 and i!=len(sentences)-1:
             n_ordering.append(i-1)
             n_ordering.append(i)
             n_ordering.append(i+1)
