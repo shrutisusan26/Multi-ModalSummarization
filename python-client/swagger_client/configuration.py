@@ -40,7 +40,7 @@ class Configuration(object):
             return
 
         # Default Base url
-        self.host = "https://centralindia.api.cognitive.microsoft.com/speechtotext/v3.0"
+        self.host = "https://westus.api.cognitive.microsoft.com/speechtotext/v3.0"
         # Temp file folder for downloading files
         self.temp_folder_path = None
 

@@ -78,7 +78,7 @@ except ApiException as e:
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://centralindia.api.cognitive.microsoft.com/speechtotext/v3.0*
+All URIs are relative to *https://westus.api.cognitive.microsoft.com/speechtotext/v3.0*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
