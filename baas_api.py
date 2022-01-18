@@ -8,7 +8,7 @@ from TextSummarization.tclustering import gen_summary, clean
 from VideoSummarization.vclustering import vsum
 from models.summary import Article,Vidpath
 from schemas.summary import summaryEntity,vsummaryEntity
-from Transcription.bTranscription import upload,getmd
+from Transcription.videofuncs import getmd, upload, getdir
 from cluster_calculation import calc_clusters
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -36,8 +36,9 @@ app.add_middleware(
 )
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile = File(...)):
-    dir = os.path.join(os.getcwd(),'Data')
-    dir = os.path.join(dir,'videos')
+    dir = getdir(file)
+    if dir == 'Invalid'
+        return {"message": "Filetype not supported"}
     if not os.path.isdir(dir):
         os.makedirs(dir)
     destination = os.path.join(dir,file.filename)

@@ -28,33 +28,14 @@ logging.basicConfig(stream=sys.stdout, format="%(asctime)s %(message)s", datefmt
 container_name = 'forlecture'
 account_name = config.storage_name
 account_key = config.storage_key
-blob_name=''
 
-def getmd(ip):
-    cap = cv2.VideoCapture(ip)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    dur = cap.get(cv2.CAP_PROP_FRAME_COUNT)/fps
-    return dur, fps
 
-def upload(ip,db):
-    video_clip =ip
-    clip = mp.VideoFileClip(video_clip)
-    global blob_name
-    blob_name = video_clip.split("\\")[-1][:-3]+'mp3'
+
+def uploadtoaz(ip,db,blob_name,dir):
     print(blob_name)
+    print(os.path.join(dir,blob_name))   
     block_list=[]
-    chunk_size=8192
-    dir = os.path.join(os.getcwd(),'Data')
-    dir = os.path.join(dir,'audio')
-    if not os.path.isdir(dir):
-        os.makedirs(dir)
-    if not os.path.isfile(os.path.join(dir,blob_name)):
-        clip.audio.write_audiofile(os.path.join(dir,blob_name))
-        sound = AudioSegment.from_mp3(os.path.join(dir,blob_name))
-        sound = sound.set_channels(1)
-        sound.export(os.path.join(dir,blob_name), format="mp3")
-    print(blob_name)
-    print(os.path.join(dir,blob_name))    
+    chunk_size=8192 
     blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
     blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
 
@@ -84,8 +65,7 @@ def upload(ip,db):
     results = transcribe(url_with_sas,blob_name,db)
     return results
 
-def transcribe_from_single_blob(uri, properties):
-    global blob_name
+def transcribe_from_single_blob(uri, properties,blob_name):
     transcription_definition = cris_client.Transcription(
         display_name=blob_name[:-3],
         description=DESCRIPTION,
@@ -141,7 +121,7 @@ def transcribe(url_with_sas,blob_name,db):
             "timeToLive": "PT1H"
         }
         
-        transcription_definition = transcribe_from_single_blob(url_with_sas, properties)
+        transcription_definition = transcribe_from_single_blob(url_with_sas, properties, blob_name)
 
         created_transcription, status, headers = api.create_transcription_with_http_info(
             transcription=transcription_definition)
