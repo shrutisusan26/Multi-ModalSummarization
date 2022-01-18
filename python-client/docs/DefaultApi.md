@@ -1,6 +1,6 @@
 # swagger_client.DefaultApi
 
-All URIs are relative to *https://centralindia.api.cognitive.microsoft.com/speechtotext/v3.0*
+All URIs are relative to *https://westus.api.cognitive.microsoft.com/speechtotext/v3.0*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
