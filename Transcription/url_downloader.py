@@ -1,6 +1,7 @@
-import urllib2
+import urllib
 import requests
 import os
+from pytube import YouTube 
 
 def is_downloadable(url):
     """
@@ -15,30 +16,46 @@ def is_downloadable(url):
         return False
     return True
 
-def download_url(url="http://download.thinkbroadband.com/10MB.zip",dir=os.path.join(os.getcwd(),'Data')):
+def download_url(url,dir=os.path.join(os.getcwd(),'Data')):
     
-    r = requests.get(url, allow_redirects=True)
-    print(r.headers.get('content-type'))
+    if "youtube" in url:
+        
+        try: 
+            # object creation using YouTube
+            # which was imported in the beginning 
+            yt = YouTube(url) 
+            stream = yt.streams.get_by_resolution("360p")
+            stream.download(output_path=dir)
+        except: 
+            print("Connection Error") #to handle exception 
     
-    if is_downloadable(url):
-        file_name = url.split('/')[-1]
-        u = urllib2.urlopen(url)
-        f = open(os.path.join(dir,file_name), 'wb')
-        meta = u.info()
-        file_size = int(meta.getheaders("Content-Length")[0])
-        print ("Downloading: %s Bytes: %s" % (file_name, file_size))
+    else:
+    
+        r = requests.get(url, allow_redirects=True)
+        print(r.headers.get('content-type'))
+        
+        if is_downloadable(url):
+            file_name = url.split('/')[-1]
+            u = urllib.request.urlopen(url)
+            f = open(os.path.join(dir,file_name), 'wb')
+            meta = u.info()
+            file_size  = int(meta.get("Content-Length"))
+            print ("Downloading: %s Bytes: %s" % (file_name, file_size))
 
-        file_size_dl = 0
-        block_sz = 8192
-        while True:
-            buffer = u.read(block_sz)
-            if not buffer:
-                break
+            file_size_dl = 0
+            block_sz = 8192
+            while True:
+                buffer = u.read(block_sz)
+                if not buffer:
+                    break
 
-            file_size_dl += len(buffer)
-            f.write(buffer)
-            status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
-            status = status + chr(8)*(len(status)+1)
-            print(status)
+                file_size_dl += len(buffer)
+                f.write(buffer)
+                status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
+                status = status + chr(8)*(len(status)+1)
+                print(status)
 
-        f.close()
+            f.close()
+        
+if __name__=="__main__":
+    download_url("https://www.youtube.com/watch?v=hYXhe31JQhc")
