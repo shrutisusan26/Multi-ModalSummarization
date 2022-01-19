@@ -12,9 +12,9 @@ def getmd(ip):
     dur = cap.get(cv2.CAP_PROP_FRAME_COUNT)/fps
     return dur, fps
 
-def upload(ip,db):
+def upload(ip,db,upload=True):
     dir = dirgetcheck('Data','audio')
-    if 'videos' in ip:
+    if not upload or 'videos' in ip:
         video_clip =ip
         clip = mp.VideoFileClip(video_clip)
         blob_name = video_clip.split("\\")[-1][:-3]+'mp3'

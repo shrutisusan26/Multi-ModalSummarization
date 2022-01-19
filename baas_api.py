@@ -4,7 +4,7 @@ import os
 import numpy as np
 from fastapi.responses import JSONResponse
 from bson.objectid import ObjectId
-from TextSummarization.tclustering import gen_summary, clean
+from TextSummarization.tclustering import gen_summary
 from VideoSummarization.vclustering import vsum
 from models.summary import Article,Vidpath
 from schemas.summary import summaryEntity,vsummaryEntity
@@ -45,6 +45,14 @@ async def create_upload_file(file: UploadFile = File(...)):
         v_clusters,t_clusters = calc_clusters(duration,ofps)
         file.file.close()
     return {"transcript": transcription, "dpath":destination, 'v_clusters':v_clusters, 't_clusters':t_clusters}
+
+@app.post("/getfrompath/")
+async def create_file(path:str):
+    print(path)
+    transcription = upload(path,db,upload=False)
+    duration, ofps = getmd(path)
+    v_clusters,t_clusters = calc_clusters(duration,ofps)
+    return {"transcript": transcription, "dpath":path, 'v_clusters':v_clusters, 't_clusters':t_clusters}
 
 @app.post("/vsummary", response_description="Post path for video summary")
 async def vsummary(path: Vidpath):
