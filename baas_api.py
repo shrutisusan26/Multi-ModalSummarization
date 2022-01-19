@@ -67,7 +67,10 @@ async def vsummary(path: Vidpath):
 
 @app.post("/summary", response_description="Post article for summary")
 async def summary(article:Article):
+   
     article = article.dict()
+    # if( article := db.Article.find_one({"article": article['article']}) ) is not None:
+    #     return JSONResponse(status_code=status.HTTP_201_CREATED, content=article['_id'])
     ordering = gen_summary(article['article'],article['t_clusters'])
     item={'article':article['article'],'order':ordering}
     response =  db.Article.insert_one(summaryEntity(item))
