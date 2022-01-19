@@ -31,7 +31,7 @@ def upload(ip,db):
                 info = fleep.get(file.read(128))
             print(info.extension)
             end = 0 - len(info.extension[0])
-            fname = ip.split("\\")[-1][:end]
+            fname = ip.split("\\")[-1][:end]+"mp3"
             nfname = os.path.join(dir,fname)
             audio = AudioSegment.from_file(ip, info.extension[0])
             audio.export(nfname, format="mp3")
