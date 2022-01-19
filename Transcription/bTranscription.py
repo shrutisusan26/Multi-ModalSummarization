@@ -2,6 +2,7 @@ import logging
 import sys
 import requests
 import time
+from helper import dirgetcheck
 import swagger_client as cris_client
 from config import config 
 from azure.storage.blob.baseblobservice import BaseBlobService
@@ -11,26 +12,21 @@ from azure.storage.blob.models import BlobPermissions
 from datetime import datetime, timedelta
 import uuid
 from azure.core.exceptions import ResourceNotFoundError
-from pydub import AudioSegment
 from schemas.summary import transEntity
 from Transcription.process_transcript import readj
-import cv2
+from helper import dirgetcheck
 
 SUBSCRIPTION_KEY = config.api_key
 SERVICE_REGION = "centralindia"
-
 DESCRIPTION = "Lecture Video"
-
 LOCALE = "en-US"
-logging.basicConfig(stream=sys.stdout, format="%(asctime)s %(message)s", datefmt="%d/%m/%Y %I:%M:%S %p %Z")
-
 container_name = 'forlecture'
 account_name = config.storage_name
 account_key = config.storage_key
 
 
 
-def uploadtoaz(ip,db,blob_name,dir):
+def uploadtoaz(db,blob_name,dir):
     print(blob_name)
     print(os.path.join(dir,blob_name))   
     block_list=[]
@@ -159,16 +155,12 @@ def transcribe(url_with_sas,blob_name,db):
             if file_data.kind != "Transcription":
                 continue
             global container_name
-            audiofilename = file_data.name
             results_url = file_data.links.content_url.split(container_name)
             print(results_url)
             blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
             blob_client = blob_service_client.get_blob_client(container=container_name, blob=results_url[1][1:])
             fname = transcription_id+'result.json'
-            dir = os.path.join(os.getcwd(),'Data')
-            dir = os.path.join(dir,'trans')
-            if not os.path.isdir(dir):
-                os.makedirs(dir)
+            dir = dirgetcheck('Data','trans')
             with open(os.path.join(dir,fname),'wb') as dw:
                 dw.write(blob_client.download_blob().readall())
             results = readj(os.path.join(dir,fname))

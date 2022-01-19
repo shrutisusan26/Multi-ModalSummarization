@@ -1,3 +1,4 @@
+import os
 def calc_clusters(duration,fps):
     total_frames = duration*fps
     
@@ -19,4 +20,11 @@ def calc_clusters(duration,fps):
     text_clusters = int(vc_clusters*2.5)
     
     return vc_clusters,text_clusters
+
+def dirgetcheck(main,sub):
+    dir = os.path.join(os.getcwd(),main)
+    dir = os.path.join(dir,sub)
+    if not os.path.isdir(dir):
+        os.makedirs(dir)
+    return dir
         
