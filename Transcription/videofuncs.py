@@ -3,6 +3,8 @@ import os
 import fleep
 from pydub import AudioSegment
 from Transcription.bTranscription import uploadtoaz
+import moviepy.editor as mp
+from helper import dirgetcheck
 
 def getmd(ip):
     cap = cv2.VideoCapture(ip)
@@ -11,8 +13,7 @@ def getmd(ip):
     return dur, fps
 
 def upload(ip,db):
-    dir = os.path.join(os.getcwd(),'Data')
-    dir = os.path.join(dir,'audio')
+    dir = dirgetcheck('Data','audio')
     if 'videos' in ip:
         video_clip =ip
         clip = mp.VideoFileClip(video_clip)
@@ -28,25 +29,23 @@ def upload(ip,db):
         else:
             with open(ip, "rb") as file:
                 info = fleep.get(file.read(128))
-            end = 0 - len(info.extension)
-            fname = ip.split("\\")[-1][:end]
+            print(info.extension)
+            end = 0 - len(info.extension[0])
+            fname = ip.split("\\")[-1][:end]+"mp3"
             nfname = os.path.join(dir,fname)
-            audio = AudioSegment.from_file(ip, info.extension)
+            audio = AudioSegment.from_file(ip, info.extension[0])
             audio.export(nfname, format="mp3")
             blob_name = fname
-    return (uploadtoaz(ip,db,blob_name,dir))
+    return (uploadtoaz(db,blob_name,dir))
 
 def getdir(file):
     mtype = file.content_type
     mtype = mtype.split('/')
     if mtype[0] == 'audio':
-        dir = os.path.join(os.getcwd(),'Data')
-        dir = os.path.join(dir,'audio')
+        dir = dirgetcheck('Data','audio')
         return dir
     elif mtype[0] == 'video':
-        dir = os.path.join(os.getcwd(),'Data')
-        dir = os.path.join(dir,'videos')
+        dir = dirgetcheck('Data','videos')
         return dir
-    #Can do for transcript upload too
     else:
         return 'Invalid'

@@ -5,9 +5,12 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 import cv2
+import os
+from helper import dirgetcheck
 
 def report_gen(report_dic,ip,fr):
-    doc = SimpleDocTemplate(ip.split("\\")[-1][:-3]+".pdf",pagesize=A4,
+    dir = dirgetcheck('Data','output_images')
+    doc = SimpleDocTemplate(ip.split("\\")[-1].split('.')[0]+".pdf",pagesize=A4,
                         rightMargin=72,leftMargin=72,
                         topMargin=72,bottomMargin=18)
     frames = report_dic.keys()
@@ -23,9 +26,9 @@ def report_gen(report_dic,ip,fr):
             ret, frame = cap.read()
             if not ret:
                 print("ERR")
-            fname=r'E:\Multi-Modal Summarization\Data\output_images\pic'+str(i)+".jpg"
+            fname=os.path.join(dir,'pic'+str(i)+".jpg")
             cv2.imwrite(fname, frame)
-            im = Image(fname, 2*inch, 5*inch)
+            im = Image(fname, 5*inch, 2*inch)
             Story.append(im)
             Story.append(Spacer(1, 12))
             val = report_dic[i]

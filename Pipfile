@@ -16,6 +16,7 @@ azure-storage = "*"
 azure-storage-blob = "*"
 opencv-python = "*"
 python-multipart = "*"
+fleep = "*"
 
 [dev-packages]
 

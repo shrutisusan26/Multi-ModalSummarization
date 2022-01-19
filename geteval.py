@@ -31,6 +31,5 @@ def test_text(summary,reference):
 		print(score)
 		return score
 
-
 if __name__=="__main__":
 		test_text(['this is her','what'],['this her','ok'])

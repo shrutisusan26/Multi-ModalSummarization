@@ -33,7 +33,6 @@ def readj(name):
             start_time = start_time+delta
     else:
         sentences[start_time] = phrases[i]['nBest'][0]['display']
-    #find_sentence_for_frame(30,70,sentences)
     print(sentences)
     return sentences
 
