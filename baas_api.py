@@ -10,13 +10,15 @@ from models.summary import Article,Vidpath
 from schemas.summary import summaryEntity,vsummaryEntity
 from Transcription.videofuncs import getmd, upload, getdir
 from helper import calc_clusters
-
+from bson import json_util
+import json
 from fastapi.middleware.cors import CORSMiddleware
 from config.db import conn, start
 
 db = conn.Vidsum
 start()
-
+def parse_json(data):
+    return json.loads(json_util.dumps(data))
 app = FastAPI()
 origins = [
     "http://localhost:3000",
@@ -57,9 +59,9 @@ async def create_file(path:str):
 @app.post("/vsummary", response_description="Post path for video summary")
 async def vsummary(path: Vidpath):
     path = path.dict()
-    print(path)
+    if( db_path := db.Vimage.find_one({"path": path}) ) is not None:
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content=parse_json(db_path)['_id']['$oid'])
     ordering,fr,t_chunks = vsum(path['path'],path['v_clusters'])
-    print(ordering,fr)
     item={'path':path,'order':ordering,'fr':fr,'t_chunks':t_chunks}
     response =  db.Vimage.insert_one(vsummaryEntity(item))
     item['id']= str(response.inserted_id)
@@ -69,8 +71,9 @@ async def vsummary(path: Vidpath):
 async def summary(article:Article):
    
     article = article.dict()
-    # if( article := db.Article.find_one({"article": article['article']}) ) is not None:
-    #     return JSONResponse(status_code=status.HTTP_201_CREATED, content=article['_id'])
+    print(article)
+    if( article_db := db.Article.find_one({"article": article['article']}) ) is not None:
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content=parse_json(article_db)['_id']['$oid'])
     ordering = gen_summary(article['article'],article['t_clusters'])
     item={'article':article['article'],'order':ordering}
     response =  db.Article.insert_one(summaryEntity(item))

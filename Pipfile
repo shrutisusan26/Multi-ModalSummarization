@@ -17,6 +17,7 @@ azure-storage-blob = "*"
 opencv-python = "*"
 python-multipart = "*"
 fleep = "*"
+python-bsonjs = "*"
 
 [dev-packages]
 
