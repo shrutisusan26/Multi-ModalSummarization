@@ -37,7 +37,8 @@ app.add_middleware(
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile = File(...)):
     dir = getdir(file)
-    if dir == 'Invalid'
+    print(dir)
+    if dir == 'Invalid':
         return {"message": "Filetype not supported"}
     if not os.path.isdir(dir):
         os.makedirs(dir)

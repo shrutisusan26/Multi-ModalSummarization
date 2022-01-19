@@ -7,7 +7,6 @@ from config import config
 from azure.storage.blob.baseblobservice import BaseBlobService
 from azure.storage.blob import BlobServiceClient, BlobBlock
 import os
-import moviepy.editor as mp
 from azure.storage.blob.models import BlobPermissions
 from datetime import datetime, timedelta
 import uuid
@@ -118,7 +117,7 @@ def transcribe(url_with_sas,blob_name,db):
             "wordLevelTimestampsEnabled": True,
             "diarizationEnabled": True,
             "destinationContainerUrl": config.container_sas_uri,
-            "timeToLive": "PT1H"
+            #"timeToLive": "PT1H"
         }
         
         transcription_definition = transcribe_from_single_blob(url_with_sas, properties, blob_name)

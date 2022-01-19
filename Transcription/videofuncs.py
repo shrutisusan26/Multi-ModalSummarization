@@ -3,7 +3,7 @@ import os
 import fleep
 from pydub import AudioSegment
 from Transcription.bTranscription import uploadtoaz
-
+import moviepy.editor as mp
 def getmd(ip):
     cap = cv2.VideoCapture(ip)
     fps = cap.get(cv2.CAP_PROP_FPS)
@@ -26,12 +26,14 @@ def upload(ip,db):
         if '.mp3' in ip.split("\\")[-1]:
             blob_name=ip.split("\\")[-1]
         else:
+            
             with open(ip, "rb") as file:
                 info = fleep.get(file.read(128))
-            end = 0 - len(info.extension)
+            print(info.extension)
+            end = 0 - len(info.extension[0])
             fname = ip.split("\\")[-1][:end]
             nfname = os.path.join(dir,fname)
-            audio = AudioSegment.from_file(ip, info.extension)
+            audio = AudioSegment.from_file(ip, info.extension[0])
             audio.export(nfname, format="mp3")
             blob_name = fname
     return (uploadtoaz(ip,db,blob_name,dir))
