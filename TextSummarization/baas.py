@@ -2,7 +2,7 @@ from os import truncate
 import torch
 from transformers import BertTokenizer
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
                         
 def get_encodings_attention(sentence):
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
