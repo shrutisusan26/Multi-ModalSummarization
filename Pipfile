@@ -18,6 +18,9 @@ opencv-python = "*"
 python-multipart = "*"
 fleep = "*"
 python-bsonjs = "*"
+fastapi = "*"
+bson = "*"
+sklearn = "*"
 
 [dev-packages]
 

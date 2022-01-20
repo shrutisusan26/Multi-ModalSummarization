@@ -15,8 +15,6 @@ response=req.json()
 summary_id= client.post(localhost+"summary",json={"article": response['transcript'],"t_clusters":response['t_clusters'],"order": {}})
 assert summary_id.status_code == 201
 summary_id=summary_id.json()
-print("")
-print(summary_id)
 text_sum_order= client.get(localhost+f"tresult/{str(summary_id)}")
 assert text_sum_order.status_code == 200
 text_sum_order=text_sum_order.json()
@@ -31,3 +29,4 @@ video_sum_order=video_sum_order.json()
 
 report_dic =  combine_summaries(text_sum_order,video_sum_order['order'],video_sum_order['fr'],video_sum_order['t_chunks'])
 report_gen(report_dic,path,video_sum_order['fr'])
+print("report generated")
