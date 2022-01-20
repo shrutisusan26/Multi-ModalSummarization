@@ -8,4 +8,3 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt 
 COPY ./ /Multi-ModalSummarization/
 RUN pip install /Multi-ModalSummarization/python-client
-CMD [ "uvicorn" , "baas_api:app", "--reload"]

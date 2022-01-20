@@ -5,10 +5,11 @@ import time
 from helper import dirgetcheck
 import swagger_client as cris_client
 from config import config 
-from azure.storage.blob.baseblobservice import BaseBlobService
-from azure.storage.blob import BlobServiceClient, BlobBlock
+#from azure.storage.blob.baseblob import BaseBlobService
+from azure.storage.blob  import BlobServiceClient, BlobBlock
+from azure.storage.blob import generate_blob_sas, BlobSasPermissions
 import os
-from azure.storage.blob.models import BlobPermissions
+#from azure.storage.blob.models import BlobPermissions
 from datetime import datetime, timedelta
 import uuid
 from azure.core.exceptions import ResourceNotFoundError
@@ -50,13 +51,17 @@ def uploadtoaz(db,blob_name,dir):
                 block_list.append(BlobBlock(block_id=blk_id))
         blob_client.commit_block_list(block_list)
             
-    blob_service = BaseBlobService(
+    blob_service = baseblobservice.BaseBlobService(
         account_name=account_name,
         account_key=account_key
     )
-    sas_token = blob_service.generate_blob_shared_access_signature(container_name, blob_name, permission=BlobPermissions.READ, expiry=datetime.utcnow() + timedelta(hours=1))
-    url_with_sas = blob_service.make_blob_url(container_name, blob_name, sas_token=sas_token)
-
+    sas_blob = generate_blob_sas(account_name=account_name, 
+                                container_name=container_name,
+                                blob_name=blob_name,
+                                account_key=account_key,
+                                permission=BlobSasPermissions(read=True),
+                                expiry=datetime.utcnow() + timedelta(hours=1))
+    url_with_sas = 'https://'+account_name+'.blob.core.windows.net/'+container_name+'/'+blob_name+'?'+sas_blob
     results = transcribe(url_with_sas,blob_name,db)
     return results
 
