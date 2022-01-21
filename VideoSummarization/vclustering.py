@@ -56,14 +56,10 @@ def vsum(ip,n_clusters):
     op = np.load(output_file)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     kmeans = kmeans.fit(op)
-    avg = []
     closest = []
-    for j in range(n_clusters):
-        idx = np.where(kmeans.labels_ == j)[0]
-        avg.append(np.mean(idx))
     closest, _ = pairwise_distances_argmin_min(kmeans.cluster_centers_,op)
-    clustering_ordering = sorted(range(n_clusters), key=lambda k: avg[k])
-    ordering = [closest[idx].item() for idx in clustering_ordering]
+    ordering = [closest[idx].item() for idx in range(n_clusters)]
+    keyframes_vectors = [op[i] for i in ordering]
     print('Clustering Finished')
-    return ordering,fr,op.shape[0]
+    return ordering,fr,op.shape[0], keyframes_vectors
 

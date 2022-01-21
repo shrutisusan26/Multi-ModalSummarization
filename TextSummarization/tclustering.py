@@ -26,14 +26,9 @@ def gen_summary(sentences,n_clusters):
     vectors = np.array(sentence_embed)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     kmeans = kmeans.fit(vectors)
-    avg = []
     closest = []
-    for j in range(n_clusters):
-        idx = np.where(kmeans.labels_ == j)[0]
-        avg.append(np.mean(idx))
     closest, _ = pairwise_distances_argmin_min(kmeans.cluster_centers_,vectors)
-    clustering_ordering = sorted(range(n_clusters), key=lambda k: avg[k])
-    ordering = [closest[idx].item() for idx in clustering_ordering]
+    ordering = [closest[idx].item() for idx in range(n_clusters)]
     n_ordering =[]
     for i in ordering:
         n_ordering.append(i)
@@ -59,7 +54,8 @@ def gen_summary(sentences,n_clusters):
     n_ordering=set(n_ordering)
     ordering = sorted(list(n_ordering))
     summary_sentences = {j[0]:j[1] for i,j in enumerate(sentences.items()) if i in ordering}
+    summary_vectors = [vectors[i] for i in ordering]
     print(summary_sentences)
     print('Clustering Finished')
-    return summary_sentences        
+    return summary_sentences, summary_vectors        
 
