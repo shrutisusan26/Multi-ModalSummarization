@@ -111,3 +111,5 @@ config.py
 #media
 *.mp3
 *.mp4
+
+*.tar
