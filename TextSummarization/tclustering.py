@@ -66,6 +66,6 @@ def gen_summary(sentences,n_clusters,ip):
     summary_vectors = [vectors[i] for i in ordering]
     print(summary_sentences)
     print('Clustering Finished')
-    np.save(output_file,summary_sentences)
+    np.save(output_file,summary_vectors)
     return summary_sentences     
 
