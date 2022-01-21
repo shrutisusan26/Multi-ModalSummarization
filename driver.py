@@ -5,14 +5,14 @@ from fastapi.testclient import TestClient
 from baas_api import app
 
 client = TestClient(app)
-path= r'C:\Users\PROJECT\Desktop\videos\Lecture 30-20211028 0641-1.mp4'
+path= r'C:\Users\PROJECT\Desktop\videos\Keynesian economics _ Aggregate demand and aggregate supply _ Macroeconomics _ Khan Academy.mp4'
 localhost="http://127.0.0.1:8000/"
 
 req=client.post(localhost+"getfrompath/",params={'path': path})
 assert req.status_code == 200
 response=req.json()
 
-summary_id= client.post(localhost+"summary",json={"article": response['transcript'],"t_clusters":response['t_clusters'],"order": {}})
+summary_id= client.post(localhost+"summary",json={"article": response['transcript'],"t_clusters":response['t_clusters'],"fpath":path,"order": {}})
 assert summary_id.status_code == 201
 summary_id=summary_id.json()
 text_sum_order= client.get(localhost+f"tresult/{str(summary_id)}")

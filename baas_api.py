@@ -74,7 +74,7 @@ async def summary(article:Article):
     print(article)
     if( article_db := db.Article.find_one({"article": article['article']}) ) is not None:
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=parse_json(article_db)['_id']['$oid'])
-    ordering = gen_summary(article['article'],article['t_clusters'])
+    ordering = gen_summary(article['article'],article['t_clusters'],article['fpath'])
     item={'article':article['article'],'order':ordering}
     response =  db.Article.insert_one(summaryEntity(item))
     item['id']= str(response.inserted_id)

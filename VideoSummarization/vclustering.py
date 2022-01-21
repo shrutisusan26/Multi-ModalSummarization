@@ -61,5 +61,6 @@ def vsum(ip,n_clusters):
     ordering = [closest[idx].item() for idx in range(n_clusters)]
     keyframes_vectors = [op[i] for i in ordering]
     print('Clustering Finished')
-    return ordering,fr,op.shape[0], keyframes_vectors
+    np.save(output_file,keyframes_vectors)
+    return ordering,fr,op.shape[0]
 

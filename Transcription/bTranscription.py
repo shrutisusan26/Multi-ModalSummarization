@@ -50,11 +50,7 @@ def uploadtoaz(db,blob_name,dir):
                 blob_client.stage_block(block_id=blk_id,data=read_data) 
                 block_list.append(BlobBlock(block_id=blk_id))
         blob_client.commit_block_list(block_list)
-            
-    blob_service = baseblobservice.BaseBlobService(
-        account_name=account_name,
-        account_key=account_key
-    )
+   
     sas_blob = generate_blob_sas(account_name=account_name, 
                                 container_name=container_name,
                                 blob_name=blob_name,

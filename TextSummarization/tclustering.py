@@ -8,6 +8,8 @@ import time
 from TextSummarization.baas import generate_sentence_embeddings
 from transformers import BertModel
 import json
+from helper import dirgetcheck
+import os
 
 def req(sentence):
     model = BertModel.from_pretrained('bert-base-uncased',
@@ -21,7 +23,14 @@ def clean(sentences):
     sentences= [re.sub("\\n","",i) for i in sentences.values()]
     return sentences
 
-def gen_summary(sentences,n_clusters):
+def gen_summary(sentences,n_clusters,ip):
+    dir = dirgetcheck('Data','feat_op')
+    opn = ip.split("\\")[-1].split('.')[0]
+    opn = opn.replace(r'\.','')
+    opn = opn.replace('\\','')
+    opn = opn.replace(':','')
+    output_file = opn+'tvop.npy'
+    output_file = os.path.join(dir,output_file)
     sentence_embed=req(sentences.values())
     vectors = np.array(sentence_embed)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
@@ -57,5 +66,6 @@ def gen_summary(sentences,n_clusters):
     summary_vectors = [vectors[i] for i in ordering]
     print(summary_sentences)
     print('Clustering Finished')
-    return summary_sentences, summary_vectors        
+    np.save(output_file,summary_sentences)
+    return summary_sentences     
 
