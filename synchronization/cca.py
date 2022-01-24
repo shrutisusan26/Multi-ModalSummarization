@@ -20,7 +20,7 @@ def cca(ip):
     print(video_features.shape)
     print(text_features.shape)
     num_padding = video_features.shape[0] - (text_features.shape[0]%video_features.shape[0])
-    text_features = np.concatenate((text_features,np.zeros(num_padding,3072)),axis=0)
+    text_features = np.concatenate((text_features,np.zeros((num_padding,3072))),axis=0)
     num_batches = text_features.shape[0]//video_features.shape[0]
     results = []
     for i in range(num_batches):
