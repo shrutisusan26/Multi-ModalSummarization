@@ -1,4 +1,5 @@
 import json
+from ..synchronization.rake import rake
 
 def find_sentence_for_frame(start_time,end_time,sentences):
     res = {key: val for key, val in filter(lambda sub: int(float(sub[0])) >= start_time and
@@ -12,7 +13,6 @@ def readj(name):
     phrases = data['recognizedPhrases']
     sentences = {}
     transcript = data['combinedRecognizedPhrases'][0]['display']
-
     for i in range(len(phrases)-1):
         start_time = phrases[i]['offsetInTicks']//(10**7)
         l_sentences = phrases[i]['nBest'][0]['display'].split(".")[:-1]
