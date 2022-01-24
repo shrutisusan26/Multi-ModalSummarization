@@ -3,7 +3,6 @@ from report_gen import  report_gen
 from final_summary import combine_summaries
 from fastapi.testclient import TestClient
 from baas_api import app
-from synchronization.cca import cca
 
 client = TestClient(app)
 path= r'C:\Users\PROJECT\Desktop\videos\Keynesian economics _ Aggregate demand and aggregate supply _ Macroeconomics _ Khan Academy.mp4'
@@ -28,7 +27,6 @@ video_sum_order= client.get(localhost+f"vresult/{str(vsummary_id)}")
 assert video_sum_order.status_code == 200
 video_sum_order=video_sum_order.json()
 
-results = cca(path)
 report_dic =  combine_summaries(text_sum_order,video_sum_order['order'],video_sum_order['fr'],video_sum_order['t_chunks'])
 report_gen(report_dic,path,video_sum_order['fr'])
 print("report generated")
