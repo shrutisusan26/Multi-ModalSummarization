@@ -20,8 +20,10 @@ def cca(ip):
     print(video_features.shape)
     print(text_features.shape)
     my_cca.fit(video_features, text_features)
-    
-    return my_cca
+    results = my_cca.predict(video_features)
+    print(results)
+    print(results.shape)
+    return results
 
 if __name__ == "__main__":
     cca(r'C:\Users\PROJECT\Desktop\videos\Keynesian economics _ Aggregate demand and aggregate supply _ Macroeconomics _ Khan Academy.mp4')
