@@ -3,7 +3,7 @@ from report_gen import  report_gen
 from final_summary import combine_summaries
 from fastapi.testclient import TestClient
 from baas_api import app
-from synchronization import cca
+from synchronization.cca import cca
 
 client = TestClient(app)
 path= r'C:\Users\PROJECT\Desktop\videos\Keynesian economics _ Aggregate demand and aggregate supply _ Macroeconomics _ Khan Academy.mp4'
