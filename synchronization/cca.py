@@ -19,10 +19,16 @@ def cca(ip):
     # Fit the model
     print(video_features.shape)
     print(text_features.shape)
-    my_cca.fit(video_features, text_features)
-    results = my_cca.predict(video_features)
-    print(results)
-    print(results.shape)
+    num_padding = video_features.shape[0] - (text_features.shape[0]%video_features.shape[0])
+    text_features = np.concatenate((text_features,np.zeros(num_padding,3072)),axis=0)
+    num_batches = text_features.shape[0]//video_features.shape[0]
+    results = []
+    for i in range(num_batches):
+        my_cca.fit(video_features, text_features[i*video_features.shape[0]:(i+1)*video_features.shape[0]])
+        batch_result = my_cca.predict(video_features)
+        print(batch_result)
+        print(batch_result.shape)
+        results.append(batch_result)
     return results
 
 if __name__ == "__main__":
