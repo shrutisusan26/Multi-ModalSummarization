@@ -26,9 +26,9 @@ def cca(ip):
     for i in range(num_batches):
         my_cca.fit(video_features, text_features[i*video_features.shape[0]:(i+1)*video_features.shape[0]])
         batch_result = my_cca.predict(video_features)
-        print(batch_result)
-        print(batch_result.shape)
         results.append(batch_result)
+    print(results)
+    print(len(results))
     return results
 
 if __name__ == "__main__":
