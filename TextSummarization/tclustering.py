@@ -19,6 +19,7 @@ def req(sentence):
     sentence_embedding = {"sentence_embedding":sentence_embedding}
     return sentence_embedding['sentence_embedding']
 
+
 def clean(sentences):
     sentences= [re.sub("\\n","",i) for i in sentences.values()]
     return sentences

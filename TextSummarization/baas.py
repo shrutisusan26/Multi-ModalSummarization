@@ -3,8 +3,28 @@ import torch
 from transformers import BertTokenizer
 import numpy as np
 #import matplotlib.pyplot as plt
+
+from nltk.stem import WordNetLemmatizer 
+nltk.download('stopwords')
+nltk.download('wordnet')
+import gensim
+import re
+
+def lemmatize(text):
+    return WordNetLemmatizer().lemmatize(text, pos='v')
+
+def preprocess(raw_text):
+
+    # keep only words
+    letters_only_text = re.sub("[^a-zA-Z]", " ", raw_text)
+
+    # convert to lower case and split 
+    words = letters_only_text.lower()
+
+    return " ".join([lemmatize(token) for token in gensim.utils.simple_preprocess(words) if (token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3) ])
                         
 def get_encodings_attention(sentence):
+    sentence = preprocess(sentence)
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     encoding= lambda sentence:tokenizer.encode(sentence,add_special_tokens=True,truncation=True)
     sent_enc=[]
