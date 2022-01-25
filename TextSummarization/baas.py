@@ -4,6 +4,7 @@ from transformers import BertTokenizer
 import numpy as np
 #import matplotlib.pyplot as plt
 
+import nltk
 from nltk.stem import WordNetLemmatizer 
 nltk.download('stopwords')
 nltk.download('wordnet')
@@ -26,7 +27,7 @@ def preprocess(sentences):
 def get_encodings_attention(sentences):
     sentences = preprocess(sentences)
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    encoding= lambda sentence:tokenizer.encode(sentences,add_special_tokens=True,truncation=True)
+    encoding= lambda sentences:tokenizer.encode(sentences,add_special_tokens=True,truncation=True)
     sent_enc=[]
     for sent in sentences:
         sent_enc.append(encoding(sent))

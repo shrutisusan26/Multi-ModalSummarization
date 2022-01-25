@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from baas_api import app
 
 client = TestClient(app)
-path= r'C:\Users\PROJECT\Desktop\videos\Keynesian economics _ Aggregate demand and aggregate supply _ Macroeconomics _ Khan Academy.mp4'
+path= r'C:\Users\PROJECT\Desktop\videos\input.mp4'
 localhost="http://127.0.0.1:8000/"
 
 req=client.post(localhost+"getfrompath/",params={'path': path})
