@@ -75,7 +75,7 @@ Data/
 resnext101.pth
 # pyenv
 .python-version
-*.pdf
+!*.pdf
 
 # celery beat schedule file
 celerybeat-schedule
