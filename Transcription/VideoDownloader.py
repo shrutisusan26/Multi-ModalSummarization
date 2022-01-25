@@ -1,7 +1,7 @@
 from pytube import YouTube 
   
 # link of the video to be downloaded 
-link="https://www.youtube.com/watch?v=xWOoBJUqlbI"
+link="https://www.youtube.com/watch?v=FGhj3CGxl8I"
 
 yt = YouTube(link)
 
