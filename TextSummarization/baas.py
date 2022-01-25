@@ -13,22 +13,22 @@ import re
 def lemmatize(text):
     return WordNetLemmatizer().lemmatize(text, pos='v')
 
-def preprocess(raw_text):
+def preprocess(sentences):
 
     # keep only words
-    letters_only_text = re.sub("[^a-zA-Z]", " ", raw_text)
+    letters_only_text = [re.sub("[^a-zA-Z]", " ", i) for i in sentences]
 
     # convert to lower case and split 
-    words = letters_only_text.lower()
+    sentence_words = [i.lower() for i in letters_only_text]
 
-    return " ".join([lemmatize(token) for token in gensim.utils.simple_preprocess(words) if (token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3) ])
+    return [" ".join([lemmatize(token) for token in gensim.utils.simple_preprocess(i) if (token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3) ]) for i in sentence_words]
                         
-def get_encodings_attention(sentence):
-    sentence = preprocess(sentence)
+def get_encodings_attention(sentences):
+    sentences = preprocess(sentences)
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    encoding= lambda sentence:tokenizer.encode(sentence,add_special_tokens=True,truncation=True)
+    encoding= lambda sentence:tokenizer.encode(sentences,add_special_tokens=True,truncation=True)
     sent_enc=[]
-    for sent in sentence:
+    for sent in sentences:
         sent_enc.append(encoding(sent))
     max_len = 0
     for i in sent_enc:

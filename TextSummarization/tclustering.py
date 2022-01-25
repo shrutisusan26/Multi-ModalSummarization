@@ -11,11 +11,11 @@ import json
 from helper import dirgetcheck
 import os
 
-def req(sentence):
+def req(sentences):
     model = BertModel.from_pretrained('bert-base-uncased',
                                     output_hidden_states = True, # Whether the model returns all hidden-states.
                                     )
-    sentence_embedding = generate_sentence_embeddings(model,sentence)
+    sentence_embedding = generate_sentence_embeddings(model,sentences)
     sentence_embedding = {"sentence_embedding":sentence_embedding}
     return sentence_embedding['sentence_embedding']
 
