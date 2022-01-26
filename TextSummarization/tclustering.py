@@ -1,5 +1,6 @@
 import requests
 from multiprocessing import Pool
+from TextSummarization.rake_transcript import rake_transcript
 import numpy as np
 from sklearn.cluster import KMeans
 import re
@@ -34,6 +35,7 @@ def gen_summary(sentences,n_clusters,ip):
     output_file = os.path.join(dir,output_file)
     
     sentence_embed=req(sentences.values())
+    keyphrases = rake_transcript(sentences.values())
     vectors = np.array(sentence_embed)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     kmeans = kmeans.fit(vectors)
@@ -64,6 +66,16 @@ def gen_summary(sentences,n_clusters,ip):
             n_ordering.append(i+2)
     n_ordering=set(n_ordering)
     ordering = sorted(list(n_ordering))
+    flag = 0
+    for i in ordering:
+        for j in keyphrases:
+            if j[1] in list(sentences.values())[i] and j[0]>20:
+                flag = 1
+                break
+        if flag==0:
+            ordering.remove(i)
+        else:
+            flag=0
     summary_sentences = {j[0]:j[1] for i,j in enumerate(sentences.items()) if i in ordering}
     summary_vectors = [vectors[i] for i in ordering]
     print(summary_sentences)

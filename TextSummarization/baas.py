@@ -4,6 +4,7 @@ from transformers import BertTokenizer
 import numpy as np
 #import matplotlib.pyplot as plt
 
+import nltk
 from nltk.stem import WordNetLemmatizer 
 nltk.download('stopwords')
 nltk.download('wordnet')

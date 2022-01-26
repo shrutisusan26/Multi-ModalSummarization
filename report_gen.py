@@ -10,7 +10,7 @@ from helper import dirgetcheck
 
 def report_gen(report_dic,ip,fr):
     dir = dirgetcheck('Data','output_images')
-    doc = SimpleDocTemplate(ip.split("\\")[-1].split('.')[0]+".pdf",pagesize=A4,
+    doc = SimpleDocTemplate(os.path.join(os.getcwd(),'reports',ip.split("\\")[-1].split('.')[0]+".pdf"),pagesize=A4,
                         rightMargin=72,leftMargin=72,
                         topMargin=72,bottomMargin=18)
     frames = report_dic.keys()
