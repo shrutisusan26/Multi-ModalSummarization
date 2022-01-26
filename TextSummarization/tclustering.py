@@ -32,6 +32,7 @@ def gen_summary(sentences,n_clusters,ip):
     opn = opn.replace(':','')
     output_file = opn+'tvop.npy'
     output_file = os.path.join(dir,output_file)
+    
     sentence_embed=req(sentences.values())
     vectors = np.array(sentence_embed)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)

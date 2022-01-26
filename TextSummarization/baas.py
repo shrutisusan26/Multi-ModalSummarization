@@ -9,6 +9,7 @@ nltk.download('stopwords')
 nltk.download('wordnet')
 import gensim
 import re
+from sentence_preprocessing import check_sentence_length, compute_tfidf, compute_word_weights
 
 def lemmatize(text):
     return WordNetLemmatizer().lemmatize(text, pos='v')
@@ -21,15 +22,18 @@ def preprocess(sentences):
     # convert to lower case and split 
     sentence_words = [i.lower() for i in letters_only_text]
 
-    return [" ".join([lemmatize(token) for token in gensim.utils.simple_preprocess(i) if (token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3) ]) for i in sentence_words]
+    return filter(check_sentence_length,[" ".join([lemmatize(token) for token in gensim.utils.simple_preprocess(i) if (token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3) ]) for i in sentence_words])
                         
 def get_encodings_attention(sentences):
+    global tfidf
+    global features
     sentences = preprocess(sentences)
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     encoding= lambda sentences:tokenizer.encode(sentences,add_special_tokens=True,truncation=True)
     sent_enc=[]
     for sent in sentences:
         sent_enc.append(encoding(sent))
+    tfidf, features = compute_tfidf(sentences)
     max_len = 0
     for i in sent_enc:
         if len(i) > max_len:
@@ -48,13 +52,14 @@ def generate_sentence_embeddings(model,sentence):
     token_embeddings = torch.stack(hidden_states, dim=0)
     token_embeddings = token_embeddings.permute(1,2,0,3)
     sent_vec=torch.zeros([0,3072])
-    for sent in token_embeddings:
+    for i, sent in enumerate(token_embeddings):
         token_vecs_cat = torch.zeros([0,3072])
         for token in sent:
             cat_vec = torch.cat((token[-1], token[-2], token[-3], token[-4]), dim=0)
             cat_vec = cat_vec[None,:]
             token_vecs_cat = torch.cat((token_vecs_cat, cat_vec), 0)
-        mean_vec=torch.mean(token_vecs_cat,dim=0)
-        mean_vec = mean_vec[None,:]
+        mean_vec = compute_word_weights(sentence,token_vecs_cat,tfidf,features,i)
+        # mean_vec=torch.mean(token_vecs_cat,dim=0)
+        # mean_vec = mean_vec[None,:]
         sent_vec = torch.cat((sent_vec, mean_vec), 0)
     return sent_vec
