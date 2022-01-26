@@ -16,7 +16,7 @@ def compute_tfidf(sentences):
 
 def compute_word_weights(sentence,token_embeddings,tfidf,features,sentence_no):
         
-    embedding = torch.zeros(3072)
+    embedding = torch.zeros([0,3072])
     tf_wts = 0
     for j in range(len(sentence.split())):
         w = sentence.split()[j]
