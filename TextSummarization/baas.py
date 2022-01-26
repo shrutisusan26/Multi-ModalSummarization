@@ -10,7 +10,7 @@ nltk.download('stopwords')
 nltk.download('wordnet')
 import gensim
 import re
-from sentence_preprocessing import check_sentence_length, compute_tfidf, compute_word_weights
+from TextSummarization.sentence_preprocessing import check_sentence_length, compute_tfidf, compute_word_weights
 
 def lemmatize(text):
     return WordNetLemmatizer().lemmatize(text, pos='v')
@@ -23,8 +23,8 @@ def preprocess(sentences):
     # convert to lower case and split 
     sentence_words = [i.lower() for i in letters_only_text]
 
-    return filter(check_sentence_length,[" ".join([lemmatize(token) for token in gensim.utils.simple_preprocess(i) if (token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3) ]) for i in sentence_words])
-                        
+    return list(filter(check_sentence_length,[" ".join([lemmatize(token) for token in gensim.utils.simple_preprocess(i) if (token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3) ]) for i in sentence_words]))
+
 def get_encodings_attention(sentences):
     global tfidf
     global features
@@ -41,10 +41,10 @@ def get_encodings_attention(sentences):
             max_len = len(i)
     padded = np.array([i + [0]*(max_len-len(i)) for i in sent_enc])
     attention_mask = np.where(padded != 0, 1, 0)
-    return padded,attention_mask
+    return padded,attention_mask,sentences
 
 def generate_sentence_embeddings(model,sentence):
-    padded,attention_mask = get_encodings_attention(sentence)
+    padded,attention_mask,sentence = get_encodings_attention(sentence)
     input_ids = torch.tensor(padded)  
     attention_mask = torch.tensor(attention_mask)
     with torch.no_grad():
@@ -59,7 +59,8 @@ def generate_sentence_embeddings(model,sentence):
             cat_vec = torch.cat((token[-1], token[-2], token[-3], token[-4]), dim=0)
             cat_vec = cat_vec[None,:]
             token_vecs_cat = torch.cat((token_vecs_cat, cat_vec), 0)
-        mean_vec = compute_word_weights(sentence,token_vecs_cat,tfidf,features,i)
+        print(sentence[i])
+        mean_vec = compute_word_weights(sentence[i],token_vecs_cat,tfidf,features,i)
         # mean_vec=torch.mean(token_vecs_cat,dim=0)
         # mean_vec = mean_vec[None,:]
         sent_vec = torch.cat((sent_vec, mean_vec), 0)

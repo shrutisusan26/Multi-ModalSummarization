@@ -34,10 +34,11 @@ def gen_summary(sentences,n_clusters,ip):
     output_file = opn+'tvop.npy'
     output_file = os.path.join(dir,output_file)
     
-    sentence_embed=req(sentences.values())
+    sentence_embed=req(list(sentences.values()))
     keyphrases = rake_transcript(sentences.values())
     vectors = np.array(sentence_embed)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
+    print(vectors.shape)
     kmeans = kmeans.fit(vectors)
     closest = []
     closest, _ = pairwise_distances_argmin_min(kmeans.cluster_centers_,vectors)

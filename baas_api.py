@@ -50,7 +50,7 @@ async def create_upload_file(file: UploadFile = File(...)):
 
 @app.post("/getfrompath/")
 async def create_file(path:str):
-    print(path)
+    #print(path)
     transcription = upload(path,db,upload=False)
     duration, ofps = getmd(path)
     v_clusters,t_clusters = calc_clusters(duration,ofps)
@@ -71,7 +71,7 @@ async def vsummary(path: Vidpath):
 async def summary(article:Article):
    
     article = article.dict()
-    print(article)
+   # print(article)
     if( article_db := db.Article.find_one({"article": article['article']}) ) is not None:
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=parse_json(article_db)['_id']['$oid'])
     ordering = gen_summary(article['article'],article['t_clusters'],article['fpath'])
