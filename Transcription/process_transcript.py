@@ -1,5 +1,5 @@
 import json
-
+import re
 def find_sentence_for_frame(start_time,end_time,sentences):
     res = {key: val for key, val in filter(lambda sub: int(float(sub[0])) >= start_time and
                                    int(float(sub[0])) <= end_time, sentences.items())}
@@ -14,7 +14,9 @@ def readj(name):
     transcript = data['combinedRecognizedPhrases'][0]['display']
     for i in range(len(phrases)-1):
         start_time = phrases[i]['offsetInTicks']//(10**7)
-        l_sentences = phrases[i]['nBest'][0]['display'].split(".")[:-1]
+        print(re.split(r'[.?!]', phrases[i]['nBest'][0]['display']))
+        l_sentences= re.split(r'[.?!]', phrases[i]['nBest'][0]['display'])[:-1]
+        #l_sentences = phrases[i]['nBest'][0]['display'].split(".")
         if len(l_sentences)>1:
             end_time = phrases[i+1]['offsetInTicks']//(10**7)
             delta = (end_time-start_time)/len(l_sentences)
@@ -23,7 +25,8 @@ def readj(name):
                 start_time = start_time+delta
         else:
             sentences[start_time] = phrases[i]['nBest'][0]['display']
-    l_sentences = phrases[-1]['nBest'][0]['display'].split(".")[:-1]
+    l_sentences= re.split(r'[!.?]',phrases[-1]['nBest'][0]['display'])[:-1]
+   # l_sentences = .split(".")[:-1]
     start_time = phrases[-1]['offsetInTicks']//(10**7)
     if len(l_sentences)>1:
         delta = (phrases[-1]['durationInTicks']//(10**7))/len(l_sentences)
