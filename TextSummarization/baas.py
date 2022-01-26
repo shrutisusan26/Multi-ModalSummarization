@@ -29,12 +29,12 @@ def get_encodings_attention(sentences):
     global tfidf
     global features
     sentences = preprocess(sentences)
+    tfidf, features = compute_tfidf(sentences)
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     encoding= lambda sentences:tokenizer.encode(sentences,add_special_tokens=True,truncation=True)
     sent_enc=[]
     for sent in sentences:
         sent_enc.append(encoding(sent))
-    tfidf, features = compute_tfidf(sentences)
     max_len = 0
     for i in sent_enc:
         if len(i) > max_len:
