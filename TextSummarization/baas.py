@@ -62,7 +62,7 @@ def generate_sentence_embeddings(model,sentence):
             token_vecs_cat = torch.cat((token_vecs_cat, cat_vec), 0)
         print(sentence[i])
         mean_vec, tf_wts = compute_word_weights(sentence[i],token_vecs_cat,tfidf,features,i)
-        sentence_scoring[sentence] = tf_wts
+        sentence_scoring[sentence] = tf_wts/len(sentence[i])
         # mean_vec=torch.mean(token_vecs_cat,dim=0)
         # mean_vec = mean_vec[None,:]
         sent_vec = torch.cat((sent_vec, mean_vec), 0)

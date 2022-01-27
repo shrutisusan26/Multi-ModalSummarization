@@ -77,8 +77,33 @@ def gen_summary(sentences,n_clusters,ip):
             ordering.remove(i)
         else:
             flag=0
+            
     summary_sentences = {j[0]:j[1] for i,j in enumerate(sentences.items()) if i in ordering}
     summary_vectors = [vectors[i] for i in ordering]
+    labels = np.zeros(len(summary_sentences))
+    labels[np.array(ordering)] = 1
+    
+    if not os.path.exists("train_data.npy"):
+        with open("train_data.npy", 'wb') as f:
+            np.save(f, summary_vectors)
+        with open("labels.npy", 'wb') as f:
+            np.save(f, labels)
+            
+    else:
+        with open("train_data.npy","rb") as f:
+            preloaded_data = np.load(f)
+            preloaded_data = np.concatenate((preloaded_data,summary_vectors))
+            
+        with open("train_data.npy","wb") as f:
+            np.save(f, preloaded_data)
+            
+        with open("labels.npy","rb") as f:
+            preloaded_labels = np.load(f)
+            preloaded_labels = np.concatenate((preloaded_labels,labels))
+        
+        with open("labels.npy","wb") as f:
+            np.save(f, preloaded_labels)
+
     print(summary_sentences)
     print('Clustering Finished')
     np.save(output_file,summary_vectors)
