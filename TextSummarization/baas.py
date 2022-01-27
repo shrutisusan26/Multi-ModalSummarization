@@ -53,6 +53,7 @@ def generate_sentence_embeddings(model,sentence):
     token_embeddings = torch.stack(hidden_states, dim=0)
     token_embeddings = token_embeddings.permute(1,2,0,3)
     sent_vec=torch.zeros([0,3072])
+    sentence_scoring = {}
     for i, sent in enumerate(token_embeddings):
         token_vecs_cat = torch.zeros([0,3072])
         for token in sent:
@@ -61,7 +62,9 @@ def generate_sentence_embeddings(model,sentence):
             token_vecs_cat = torch.cat((token_vecs_cat, cat_vec), 0)
         print(sentence[i])
         mean_vec, tf_wts = compute_word_weights(sentence[i],token_vecs_cat,tfidf,features,i)
+        sentence_scoring[sentence] = tf_wts
         # mean_vec=torch.mean(token_vecs_cat,dim=0)
         # mean_vec = mean_vec[None,:]
         sent_vec = torch.cat((sent_vec, mean_vec), 0)
+    print(sentence_scoring)
     return sent_vec
