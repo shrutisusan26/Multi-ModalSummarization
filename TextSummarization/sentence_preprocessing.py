@@ -24,6 +24,6 @@ def compute_word_weights(sentence,token_embeddings,tfidf,features,sentence_no):
         embedding = torch.add(embedding,tfidf[sentence_no][features[w]]*token_embeddings[j])
         tf_wts += tfidf[sentence_no][features[w]]
     #print(embedding.shape)
-    return embedding
-    
+    return embedding, tf_wts
+
     
