@@ -58,10 +58,11 @@ def gen_summary(sentences,n_clusters,ip):
     opn = opn.replace(':','')
     output_file = opn+'tvop.npy'
     output_file = os.path.join(dir,output_file)
-    sentences = list(filter(check_sentence_length,sentences))
-    sentences = preprocess(sentences)
-    sentence_embed=req(sentences)
-    keyphrases = rake_transcript(sentences)
+    sentences = {key:val for key, val in sentences.items() if check_sentence_length(val)}
+    list_sentences = list(sentences.values())
+    preprocessed_sentences = preprocess(list_sentences)
+    sentence_embed=req(preprocessed_sentences)
+    keyphrases = rake_transcript(list_sentences)
     vectors = np.array(sentence_embed)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     print(vectors.shape)
@@ -79,14 +80,14 @@ def gen_summary(sentences,n_clusters,ip):
             n_ordering.append(i-1)
             n_ordering.append(i+1)
             n_ordering.append(i+2)
-        if i == len(sentences)-1:
+        if i == len(list_sentences)-1:
             n_ordering.append(i-1)
             n_ordering.append(i-2)
-        if i == len(sentences)-2:
+        if i == len(list_sentences)-2:
             n_ordering.append(i-1)
             n_ordering.append(i-2)
             n_ordering.append(i+1)
-        if i!=0 and i!=len(sentences)-1 and i!=1 and i!=len(sentences)-2:
+        if i!=0 and i!=len(list_sentences)-1 and i!=1 and i!=len(list_sentences)-2:
             n_ordering.append(i-1)
             n_ordering.append(i-2)
             n_ordering.append(i+1)
@@ -96,7 +97,7 @@ def gen_summary(sentences,n_clusters,ip):
     flag = 0
     for i in ordering:
         for j in keyphrases:
-            if j[1] in list(sentences.values())[i] and j[0]>20:
+            if j[1] in list_sentences[i] and j[0]>20:
                 flag = 1
                 break
         if flag==0:
