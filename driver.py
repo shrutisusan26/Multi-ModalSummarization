@@ -7,7 +7,7 @@ import os
 client = TestClient(app)
 localhost="http://127.0.0.1:8000/"
 path= r"E:\Multi-Modal Summarization\Transcription"
-paths=['tomasulo.mp4' ]
+paths=['lcs.mp4' ]
 for videos in paths:
     req=client.post(localhost+"getfrompath/",params={'path':os.path.join(path,videos)})
     assert req.status_code == 200

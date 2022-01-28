@@ -15,6 +15,28 @@ import os
 from TextSummarization.text_preprocessing import preprocess
 from TextSummarization.sentence_preprocessing import check_sentence_length
 
+import nltk
+from nltk.stem import WordNetLemmatizer 
+nltk.download('stopwords')
+nltk.download('wordnet')
+import gensim
+import re
+
+from TextSummarization.sentence_preprocessing import check_sentence_length
+
+def lemmatize(text):
+    return WordNetLemmatizer().lemmatize(text, pos='v')
+
+def preprocess(sentences):
+
+    # keep only words
+    letters_only_text = [re.sub("[^a-zA-Z]", " ", i) for i in sentences]
+
+    # convert to lower case and split 
+    sentence_words = [i.lower() for i in letters_only_text]
+
+    return list(filter(check_sentence_length,[" ".join([lemmatize(token) for token in gensim.utils.simple_preprocess(i) if (token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3) ]) for i in sentence_words]))
+
 def req(sentences):
     model = BertModel.from_pretrained('bert-base-uncased',
                                     output_hidden_states = True, # Whether the model returns all hidden-states.
@@ -84,29 +106,30 @@ def gen_summary(sentences,n_clusters,ip):
             
     summary_sentences = {j[0]:j[1] for i,j in enumerate(sentences.items()) if i in ordering}
     summary_vectors = [vectors[i] for i in ordering]
-    labels = np.zeros(len(summary_sentences))
+    labels = np.zeros(len(sentences))
     labels[np.array(ordering)] = 1
     
+    print(labels)
     if not os.path.exists("train_data.npy"):
-        with open("train_data.npy", 'wb') as f:
-            np.save(f, summary_vectors)
-        with open("labels.npy", 'wb') as f:
-            np.save(f, labels)
+        with open("train_data.npy", 'wb') as file:
+            np.save(file, summary_vectors)
+        with open("labels.npy", 'wb') as file:
+            np.save(file, labels)
             
     else:
-        with open("train_data.npy","rb") as f:
-            preloaded_data = np.load(f)
+        with open("train_data.npy","rb") as file:
+            preloaded_data = np.load(file)
             preloaded_data = np.concatenate((preloaded_data,summary_vectors))
             
-        with open("train_data.npy","wb") as f:
-            np.save(f, preloaded_data)
+        with open("train_data.npy","wb") as file:
+            np.save(file, preloaded_data)
             
-        with open("labels.npy","rb") as f:
-            preloaded_labels = np.load(f)
+        with open("labels.npy","rb") as file:
+            preloaded_labels = np.load(file)
             preloaded_labels = np.concatenate((preloaded_labels,labels))
         
-        with open("labels.npy","wb") as f:
-            np.save(f, preloaded_labels)
+        with open("labels.npy","wb") as file:
+            np.save(file, preloaded_labels)
 
     print(summary_sentences)
     print('Clustering Finished')
