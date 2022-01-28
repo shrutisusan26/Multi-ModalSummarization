@@ -1,3 +1,4 @@
+import imp
 import requests
 from multiprocessing import Pool
 from TextSummarization.rake_transcript import rake_transcript
@@ -11,6 +12,8 @@ from transformers import BertModel
 import json
 from helper import dirgetcheck
 import os
+from TextSummarization.text_preprocessing import preprocess
+from TextSummarization.sentence_preprocessing import check_sentence_length
 
 def req(sentences):
     model = BertModel.from_pretrained('bert-base-uncased',
@@ -33,9 +36,10 @@ def gen_summary(sentences,n_clusters,ip):
     opn = opn.replace(':','')
     output_file = opn+'tvop.npy'
     output_file = os.path.join(dir,output_file)
-    
-    sentence_embed=req(list(sentences.values()))
-    keyphrases = rake_transcript(sentences.values())
+    sentences = list(filter(check_sentence_length,sentences))
+    sentences = preprocess(sentences)
+    sentence_embed=req(sentences)
+    keyphrases = rake_transcript(sentences)
     vectors = np.array(sentence_embed)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     print(vectors.shape)
