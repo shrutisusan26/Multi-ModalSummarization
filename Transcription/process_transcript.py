@@ -1,11 +1,15 @@
 import json
+from TextSummarization.sentence_preprocessing import check_sentence_length
 
 def find_sentence_for_frame(start_time,end_time,sentences):
     res = {key: val for key, val in filter(lambda sub: int(float(sub[0])) >= start_time and
                                    int(float(sub[0])) <= end_time, sentences.items())}
     return res
 
-
+def clean(sentences):
+    sentence = {key:val for key, val in sentences.items() if check_sentence_length(val.split())}
+    return sentence
+    
 def readj(name):
     with open(name) as f:
         data = json.load(f)
@@ -33,6 +37,7 @@ def readj(name):
     else:
         sentences[start_time] = phrases[i]['nBest'][0]['display']
     print(sentences)
+    sentences = clean(sentences)
     return sentences
 
 if __name__=="__main__":

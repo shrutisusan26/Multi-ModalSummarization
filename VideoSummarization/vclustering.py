@@ -8,7 +8,7 @@ from VideoSummarization.extract import get_feat
 import cv2
 import os 
 import shutil
-from helper import dirgetcheck
+from helper import dirgetcheck, getclusters
 
 def cosine_distance_between_two_images(v1, v2):
     return (1- scipy.spatial.distance.cosine(v1, v2))
@@ -40,7 +40,7 @@ def clean(dir1,op):
     shutil.rmtree(dir1)
     os.makedirs(dir1)
 
-def vsum(ip,n_clusters):
+def vsum(ip):
     dir1 = dirgetcheck('Data','output_images')
     dir2 = dirgetcheck('Data','feat_op')
     fr = getfr(ip)
@@ -54,6 +54,7 @@ def vsum(ip,n_clusters):
     get_feat(ip,fr,output_file)
     print(output_file)
     op = np.load(output_file)
+    n_clusters = getclusters(op)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     kmeans = kmeans.fit(op)
     closest = []
