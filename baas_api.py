@@ -1,3 +1,6 @@
+import imp
+from tabnanny import filename_only
+from urllib import response
 from fastapi import FastAPI, status ,HTTPException, File, UploadFile
 import shutil
 import os
@@ -6,7 +9,7 @@ from fastapi.responses import JSONResponse
 from bson.objectid import ObjectId
 from TextSummarization.tclustering import gen_summary
 from VideoSummarization.vclustering import vsum
-from models.summary import Article,Vidpath
+from models.summary import Article,Vidpath,Transcript
 from schemas.summary import summaryEntity,vsummaryEntity
 from Transcription.videofuncs import getmd, upload, getdir
 from helper import calc_clusters
@@ -14,6 +17,7 @@ from bson import json_util
 import json
 from fastapi.middleware.cors import CORSMiddleware
 from config.db import conn, start
+from Transcription.youtube_transcribe import get_yt_transcript
 
 db = conn.Vidsum
 start()
@@ -52,9 +56,11 @@ async def create_upload_file(file: UploadFile = File(...)):
 async def create_file(path:str):
     #print(path)
     #transcription = upload(path,db,upload=False)
+    print("Here")
     transcription= {"0.0":"Hello"}
     duration, ofps = getmd(path)
     v_clusters,t_clusters = calc_clusters(duration,ofps)
+    print("Here2")
     return {"transcript": transcription, "dpath":path, 'v_clusters':v_clusters, 't_clusters':t_clusters}
 
 @app.post("/vsummary", response_description="Post path for video summary")
@@ -80,6 +86,13 @@ async def summary(article:Article):
     response =  db.Article.insert_one(summaryEntity(item))
     item['id']= str(response.inserted_id)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=item['id'])
+
+@app.post("/link", response_description="To pass the link to a youtube video",response_model=dict)
+async def transcript_post(link:Transcript):
+    print(link)
+    link = link.dict()
+    file_name = get_yt_transcript(link['url'])
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=file_name)
 
 @app.get('/tresult/{id}',response_description="Retrieves the summary", response_model=dict)
 async def tresult(id:str):

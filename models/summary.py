@@ -12,3 +12,6 @@ class Vidpath(BaseModel):
     order: Optional[ List[int] ] = None
     fr: Optional[int] = None
     t_chunks: Optional[int] = None
+    
+class Transcript(BaseModel):
+    url: str = Field(...)
