@@ -41,20 +41,17 @@ def readj(name):
     return sentences
 
 def process_yttranscript(transcript):
-    transcript = transcript.dict()
-    print(transcript)
     curr_sentence = []
     processed = {}
     flag = 1
     curr_time = list(transcript.keys())[0]
-    print(curr_time)
     for time,sent in transcript.items():
+        #print(time,sent)
         sent = sent.split()
         for i in sent:
             if i[-1]==".":
                 curr_sentence.append(i)
                 processed[curr_time] = " ".join(curr_sentence)
-                print(processed)
                 flag = 0
                 curr_sentence = []
             else:
@@ -65,12 +62,13 @@ def process_yttranscript(transcript):
                 flag = 1
         if flag==0:
             curr_time = time
-    print(processed)
+    if processed == {}:
+        return transcript
     return processed 
 
 if __name__=="__main__":
     #readj("transcript.json")
-    with open(r"E:\Multi-Modal Summarization\Data\trans\pN3jRihVpGk.json") as f:
+    with open(r"E:\Multi-Modal Summarization\Data\trans\j5XdY5wkVTA.json") as f:
         fil = json.load(f)
     process_yttranscript(fil)
     

@@ -10,22 +10,22 @@ import json
 client = TestClient(app)
 localhost="http://127.0.0.1:8000/"
 path= r"E:\Multi-Modal Summarization\Data\videos"
-paths=['tomasulo.mp4' ]
+paths=['econ.mp4' ]
 for videos in paths:
     req=client.post(localhost+"getfrompath/",params={'path':os.path.join(path,videos)})
     assert req.status_code == 200
     response=req.json()
 
-    print(response['transcript'])
+    #print(response['transcript'])
 
-    url = "https://www.youtube.com/watch?v=pN3jRihVpGk&list=PLKiU8vyKB6ti1_rUlpZJFdPaxT04sUIoV&index=1"
-    print(url)
+    url = "https://www.youtube.com/watch?v=j5XdY5wkVTA&list=PLUl4u3cNGP63Z979ri_UXXk_1zrvrF77Q"
+    #print(url)
     req=client.post(localhost+"link",json={"url":url})
-    print(req.status_code)
+    #print(req.status_code)
     assert req.status_code == 201
     response1=req.json()
 
-    print(response1)
+    #print(response1)
     with open(response1) as json_file:
         transcript = json.load(json_file)
     print(process_yttranscript(transcript))

@@ -1,3 +1,4 @@
+from decimal import DivisionByZero
 from os import truncate
 import torch
 from transformers import BertTokenizer
@@ -41,7 +42,12 @@ def generate_sentence_embeddings(model,sentences):
             token_vecs_cat = torch.cat((token_vecs_cat, cat_vec), 0)
        # print(sentences[i])
         mean_vec, tf_wts = compute_word_weights(sentences[i],token_vecs_cat,tfidf,features,i)
-        sentence_scoring[sentences[i]] = tf_wts/len(sentences[i])
+        #print(sentences[i])
+        try:
+            sentence_scoring[sentences[i]] = tf_wts/len(sentences[i])
+        except ZeroDivisionError:
+            sentence_scoring[sentences[i]] = 0
+        #print("---")
         # mean_vec=torch.mean(token_vecs_cat,dim=0)
         # mean_vec = mean_vec[None,:]
         sent_vec = torch.cat((sent_vec, mean_vec), 0)
