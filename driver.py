@@ -6,7 +6,6 @@ from baas_api import app
 import os
 from Transcription.process_transcript import process_yttranscript
 import json
-import urllib3
 
 client = TestClient(app)
 localhost="http://127.0.0.1:8000/"
@@ -19,17 +18,18 @@ for videos in paths:
 
     print(response['transcript'])
 
-    url = urllib3.parse.quote("https://www.youtube.com/watch?v=pN3jRihVpGk&list=PLKiU8vyKB6ti1_rUlpZJFdPaxT04sUIoV&index=1")
-    req=client.post(localhost+"link",params={'url':str(url)})
+    url = "https://www.youtube.com/watch?v=pN3jRihVpGk&list=PLKiU8vyKB6ti1_rUlpZJFdPaxT04sUIoV&index=1"
+    print(url)
+    req=client.post(localhost+"link",json={"url":url})
     print(req.status_code)
     assert req.status_code == 201
     response1=req.json()
 
-    with open(response1['content']) as json_file:
+    print(response1)
+    with open(response1) as json_file:
         transcript = json.load(json_file)
-
+    print(process_yttranscript(transcript))
     summary_id= client.post(localhost+"summary",json={"article": process_yttranscript(transcript),"t_clusters":response['t_clusters'],"fpath":os.path.join(path,videos),"order": {}})
-
     assert summary_id.status_code == 201
     summary_id=summary_id.json()
     text_sum_order= client.get(localhost+f"tresult/{str(summary_id)}")

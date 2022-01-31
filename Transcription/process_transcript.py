@@ -1,5 +1,5 @@
 import json
-from TextSummarization.sentence_preprocessing import check_sentence_length
+#from TextSummarization.sentence_preprocessing import check_sentence_length
 
 def find_sentence_for_frame(start_time,end_time,sentences):
     res = {key: val for key, val in filter(lambda sub: int(float(sub[0])) >= start_time and
@@ -41,16 +41,20 @@ def readj(name):
     return sentences
 
 def process_yttranscript(transcript):
+    transcript = transcript.dict()
+    print(transcript)
     curr_sentence = []
     processed = {}
     flag = 1
     curr_time = list(transcript.keys())[0]
+    print(curr_time)
     for time,sent in transcript.items():
         sent = sent.split()
         for i in sent:
             if i[-1]==".":
                 curr_sentence.append(i)
                 processed[curr_time] = " ".join(curr_sentence)
+                print(processed)
                 flag = 0
                 curr_sentence = []
             else:
@@ -61,9 +65,13 @@ def process_yttranscript(transcript):
                 flag = 1
         if flag==0:
             curr_time = time
+    print(processed)
     return processed 
 
 if __name__=="__main__":
-    readj("transcript.json")
+    #readj("transcript.json")
+    with open(r"E:\Multi-Modal Summarization\Data\trans\pN3jRihVpGk.json") as f:
+        fil = json.load(f)
+    process_yttranscript(fil)
     
     
