@@ -51,7 +51,8 @@ async def create_upload_file(file: UploadFile = File(...)):
 @app.post("/getfrompath/")
 async def create_file(path:str):
     #print(path)
-    transcription = upload(path,db,upload=False)
+    #transcription = upload(path,db,upload=False)
+    transcription= {"0.0":"Hello"}
     duration, ofps = getmd(path)
     v_clusters,t_clusters = calc_clusters(duration,ofps)
     return {"transcript": transcription, "dpath":path, 'v_clusters':v_clusters, 't_clusters':t_clusters}
@@ -61,7 +62,7 @@ async def vsummary(path: Vidpath):
     path = path.dict()
     if( db_path := db.Vimage.find_one({"path": path}) ) is not None:
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=parse_json(db_path)['_id']['$oid'])
-    ordering,fr,t_chunks = vsum(path['path'])
+    ordering,fr,t_chunks = vsum(path['path'],path['v_clusters'])
     item={'path':path,'order':ordering,'fr':fr,'t_chunks':t_chunks}
     response =  db.Vimage.insert_one(vsummaryEntity(item))
     item['id']= str(response.inserted_id)
@@ -74,7 +75,7 @@ async def summary(article:Article):
    # print(article)
     if( article_db := db.Article.find_one({"article": article['article']}) ) is not None:
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=parse_json(article_db)['_id']['$oid'])
-    ordering = gen_summary(article['article'],article['fpath'])
+    ordering = gen_summary(article['article'],article['fpath'],article['t_clusters'])
     item={'article':article['article'],'order':ordering}
     response =  db.Article.insert_one(summaryEntity(item))
     item['id']= str(response.inserted_id)

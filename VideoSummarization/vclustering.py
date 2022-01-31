@@ -40,7 +40,7 @@ def clean(dir1,op):
     shutil.rmtree(dir1)
     os.makedirs(dir1)
 
-def vsum(ip):
+def vsum(ip,n_clusters):
     dir1 = dirgetcheck('Data','output_images')
     dir2 = dirgetcheck('Data','feat_op')
     fr = getfr(ip)
@@ -54,7 +54,7 @@ def vsum(ip):
     get_feat(ip,fr,output_file)
     print(output_file)
     op = np.load(output_file)
-    n_clusters = getclusters(op)
+    n_clusters = getclusters(op,n_clusters)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     kmeans = kmeans.fit(op)
     closest = []

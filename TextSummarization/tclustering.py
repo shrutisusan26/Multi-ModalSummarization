@@ -65,7 +65,7 @@ def lsa(kmeans,n_clusters,sentences):
             summ.append(cluster[0])
     return summ
 
-def gen_summary(sentences,ip):
+def gen_summary(sentences,ip,n_clusters):
     dir = dirgetcheck('Data','feat_op')
     opn = ip.split("\\")[-1].split('.')[0]
     opn = opn.replace(r'\.','')
@@ -77,7 +77,7 @@ def gen_summary(sentences,ip):
     preprocessed_sentences = preprocess(list_sentences)
     print(len(preprocessed_sentences))
     sentence_embed=req(preprocessed_sentences)
-    n_clusters = getclusters(sentence_embed)
+    n_clusters = getclusters(sentence_embed,n_clusters)
     keyphrases = rake_transcript(list_sentences)
     vectors = np.array(sentence_embed)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)

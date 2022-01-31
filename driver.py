@@ -4,6 +4,9 @@ from final_summary import combine_summaries
 from fastapi.testclient import TestClient
 from baas_api import app
 import os
+from Transcription.process_transcript import process_yttranscript
+import json
+
 client = TestClient(app)
 localhost="http://127.0.0.1:8000/"
 path= r"E:\Multi-Modal Summarization\Data\videos"
@@ -13,7 +16,10 @@ for videos in paths:
     assert req.status_code == 200
     response=req.json()
 
-    summary_id= client.post(localhost+"summary",json={"article": response['transcript'],"t_clusters":response['t_clusters'],"fpath":os.path.join(path,videos),"order": {}})
+    with open(r'E:\Multi-Modal Summarization\Data\trans\j5XdY5wkVTA.json') as json_file:
+        transcript = json.load(json_file)
+
+    summary_id= client.post(localhost+"summary",json={"article": process_yttranscript(transcript),"t_clusters":response['t_clusters'],"fpath":os.path.join(path,videos),"order": {}})
     assert summary_id.status_code == 201
     summary_id=summary_id.json()
     text_sum_order= client.get(localhost+f"tresult/{str(summary_id)}")
