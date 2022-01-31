@@ -14,6 +14,9 @@ tuned_parameters = [
     {"kernel": ["linear"], "C": [1, 10, 100, 1000]},
 ]
 
+print(X.shape)
+print(Y.shape)
+
 scores = ["precision", "recall"]
 
 for score in scores:

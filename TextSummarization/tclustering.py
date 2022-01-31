@@ -24,19 +24,6 @@ import re
 
 from TextSummarization.sentence_preprocessing import check_sentence_length
 
-def lemmatize(text):
-    return WordNetLemmatizer().lemmatize(text, pos='v')
-
-def preprocess(sentences):
-
-    # keep only words
-    letters_only_text = [re.sub("[^a-zA-Z]", " ", i) for i in sentences]
-
-    # convert to lower case and split 
-    sentence_words = [i.lower() for i in letters_only_text]
-
-    return list(filter(check_sentence_length,[" ".join([lemmatize(token) for token in gensim.utils.simple_preprocess(i) if (token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3) ]) for i in sentence_words]))
-
 def req(sentences):
     model = BertModel.from_pretrained('bert-base-uncased',
                                     output_hidden_states = True, # Whether the model returns all hidden-states.
@@ -61,6 +48,7 @@ def gen_summary(sentences,n_clusters,ip):
     sentences = {key:val for key, val in sentences.items() if check_sentence_length(val)}
     list_sentences = list(sentences.values())
     preprocessed_sentences = preprocess(list_sentences)
+    print(len(preprocessed_sentences))
     sentence_embed=req(preprocessed_sentences)
     keyphrases = rake_transcript(list_sentences)
     vectors = np.array(sentence_embed)

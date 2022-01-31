@@ -9,9 +9,11 @@ def process_transcript(transcript):
     flag = 1
     curr_time = list(transcript.keys())[0]
     for time,sent in transcript.items():
+        sent=re.sub('\[(.*?)\]','',sent)
+        sent=re.sub('\n+',' ',sent)
         sent = sent.split()
         for i in sent:
-            if i[-1]==".":
+            if i[-1] in ['.','?','!']:
                 curr_sentence.append(i)
                 processed[curr_time] = " ".join(curr_sentence)
                 flag = 0

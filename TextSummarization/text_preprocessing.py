@@ -13,8 +13,6 @@ def preprocess(sentences):
 
     # keep only words
     letters_only_text = [re.sub("[^a-zA-Z]", " ", i) for i in sentences]
-
     # convert to lower case and split 
     sentence_words = [i.lower() for i in letters_only_text]
-
     return [" ".join([lemmatize(token) for token in gensim.utils.simple_preprocess(i) if (token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3) ]) for i in sentence_words]
