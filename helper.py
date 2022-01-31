@@ -1,6 +1,5 @@
 import os
 import numpy as np
-import pandas as pd
 from sklearn.cluster import KMeans
 from yellowbrick.cluster import KElbowVisualizer
 
@@ -16,27 +15,21 @@ class OptimalClusters:
         for k in range(self.min_clusters, self.max_clusters):
             refDisps = np.zeros(nrefs)
             for i in range(nrefs):
-                
                 # Create new random reference set
                 randomReference = np.random.random_sample(size=self.data.shape)
-                
                 # Fit to it
                 km = KMeans(k)
                 km.fit(randomReference)
-                
                 refDisp = km.inertia_
                 refDisps[i] = refDisp
 
             km = KMeans(k)
             km.fit(self.data)
-            
             origDisp = km.inertia_
             gap = np.log(np.mean(refDisps)) - np.log(origDisp)
-            
             if gap>=max_gap:
                 optimal_k = k
                 max_gap = gap
-                
         return optimal_k
     
     def elbow_visualizer(self,metric='distortion'):
@@ -82,6 +75,5 @@ def getclusters(data,n_clusters,range=5):
     max_clusters = n_clusters+range
     obj = OptimalClusters(data,min_clusters,max_clusters)
     clusters = obj.gap_statistic()
-    print(clusters)
     return clusters
         

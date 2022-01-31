@@ -1,19 +1,14 @@
-import logging
-import sys
-import requests
 import time
 from helper import dirgetcheck
 import swagger_client as cris_client
 from config import config 
-#from azure.storage.blob.baseblob import BaseBlobService
 from azure.storage.blob  import BlobServiceClient, BlobBlock
 from azure.storage.blob import generate_blob_sas, BlobSasPermissions
 import os
-#from azure.storage.blob.models import BlobPermissions
 from datetime import datetime, timedelta
 import uuid
 from azure.core.exceptions import ResourceNotFoundError
-from schemas.summary import transEntity
+from entities.dbschemas import transEntity
 from Transcription.process_transcript import readj
 from helper import dirgetcheck
 
@@ -24,12 +19,7 @@ LOCALE = "en-US"
 container_name = 'forlecture'
 account_name = config.storage_name
 account_key = config.storage_key
-
-
-
-def uploadtoaz(db,blob_name,dir):
-    print(blob_name)
-    print(os.path.join(dir,blob_name))   
+def uploadtoaz(db,blob_name,dir):  
     block_list=[]
     chunk_size=8192 
     blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
@@ -69,7 +59,6 @@ def transcribe_from_single_blob(uri, properties,blob_name):
         content_urls=[uri],
         properties=properties
     )
-
     return transcription_definition
 
 def _paginate(api, paginated_object):
@@ -85,7 +74,6 @@ def _paginate(api, paginated_object):
             api.api_client.configuration.host):]
         paginated_object, status, headers = api.api_client.call_api(link, "GET",
                                                                     response_type=typename, auth_settings=auth_settings)
-
         if status == 200:
             yield from paginated_object.values
         else:
@@ -93,8 +81,7 @@ def _paginate(api, paginated_object):
                 f"could not receive paginated data: status {status}")
 
 def transcribe(url_with_sas,blob_name,db):
-    logging.info("Starting transcription client...")
-
+  
         # configure API key authorization: subscription_key
     configuration = cris_client.Configuration()
     configuration.api_key["Ocp-Apim-Subscription-Key"] = SUBSCRIPTION_KEY
@@ -114,7 +101,6 @@ def transcribe(url_with_sas,blob_name,db):
             "wordLevelTimestampsEnabled": True,
             "diarizationEnabled": True,
             "destinationContainerUrl": config.container_sas_uri,
-            #"timeToLive": "PT1H"
         }
         
         transcription_definition = transcribe_from_single_blob(url_with_sas, properties, blob_name)
@@ -124,14 +110,6 @@ def transcribe(url_with_sas,blob_name,db):
 
         # get the transcription Id from the location URI
         transcription_id = headers["location"].split("/")[-1]
-
-        # Log information about the created transcription. If you should ask for support, please
-        # include this information.
-        logging.info(
-            f"Created new transcription with id '{transcription_id}' in region {SERVICE_REGION}")
-
-        logging.info("Checking status.")
-
         completed = False
 
         while not completed:
@@ -139,8 +117,6 @@ def transcribe(url_with_sas,blob_name,db):
             time.sleep(5)
 
             transcription = api.get_transcription(transcription_id)
-            logging.info(f"Transcriptions status: {transcription.status}")
-
             if transcription.status in ("Failed", "Succeeded"):
                 completed = True
                 item={'transcription_id':transcription_id,'blob_name':blob_name}
@@ -150,14 +126,12 @@ def transcribe(url_with_sas,blob_name,db):
         transcription_id = transcription_id['transcription_id']
     transcription = api.get_transcription(transcription_id)
     if transcription.status == "Succeeded":
-        print("succeeded")
         pag_files = api.get_transcription_files(transcription_id)
         for file_data in _paginate(api, pag_files):
             if file_data.kind != "Transcription":
                 continue
             global container_name
             results_url = file_data.links.content_url.split(container_name)
-            print(results_url)
             blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
             blob_client = blob_service_client.get_blob_client(container=container_name, blob=results_url[1][1:])
             fname = transcription_id+'result.json'
@@ -165,11 +139,8 @@ def transcribe(url_with_sas,blob_name,db):
             with open(os.path.join(dir,fname),'wb') as dw:
                 dw.write(blob_client.download_blob().readall())
             results = readj(os.path.join(dir,fname))
-            print(results)
             return results
     elif transcription.status == "Failed":
-        print("failed")
-        logging.info(f"Transcription failed: {transcription.properties.error.message}")
         results = 'Failed'
         return results
         

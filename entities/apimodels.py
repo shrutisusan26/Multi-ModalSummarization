@@ -15,3 +15,4 @@ class Vidpath(BaseModel):
     
 class Transcript(BaseModel):
     url: str = Field(...)
+    

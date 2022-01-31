@@ -1,7 +1,4 @@
-import math
-from tkinter.ttk import tclobjs_to_py
 from sklearn.feature_extraction.text import TfidfVectorizer
-from collections import defaultdict
 import torch
 import nltk
 from nltk.stem import WordNetLemmatizer 
@@ -14,7 +11,6 @@ def check_sentence_length(sentence):
     return True if len(sentence)>3 else False
 
 def compute_tfidf(sentences):
-    print(sentences)
     tfidf_vectorizer = TfidfVectorizer()
     tfidf = tfidf_vectorizer.fit_transform(sentences)
     tfidf = tfidf.toarray()
@@ -29,7 +25,6 @@ def compute_word_weights(sentence,token_embeddings,tfidf,features,sentence_no):
         w = sentence.split()[j]
         embedding = torch.add(embedding,tfidf[sentence_no][features[w]]*token_embeddings[j])
         tf_wts += tfidf[sentence_no][features[w]]
-    #print(embedding.shape)
     return embedding, tf_wts
 
 def lemmatize(text):

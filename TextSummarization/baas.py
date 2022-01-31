@@ -1,9 +1,6 @@
-from decimal import DivisionByZero
-from os import truncate
 import torch
 from transformers import BertTokenizer
 import numpy as np
-#import matplotlib.pyplot as plt
 from TextSummarization.sentence_preprocessing import compute_tfidf, compute_word_weights
 
 def get_encodings_attention(sentences):
@@ -40,16 +37,10 @@ def generate_sentence_embeddings(model,sentences):
             cat_vec = torch.cat((token[-1], token[-2], token[-3], token[-4]), dim=0)
             cat_vec = cat_vec[None,:]
             token_vecs_cat = torch.cat((token_vecs_cat, cat_vec), 0)
-       # print(sentences[i])
         mean_vec, tf_wts = compute_word_weights(sentences[i],token_vecs_cat,tfidf,features,i)
-        #print(sentences[i])
         try:
             sentence_scoring[sentences[i]] = tf_wts/len(sentences[i])
         except ZeroDivisionError:
             sentence_scoring[sentences[i]] = 0
-        #print("---")
-        # mean_vec=torch.mean(token_vecs_cat,dim=0)
-        # mean_vec = mean_vec[None,:]
         sent_vec = torch.cat((sent_vec, mean_vec), 0)
-    print(sentence_scoring)
     return sent_vec

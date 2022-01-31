@@ -1,24 +1,21 @@
-import imp
-from tabnanny import filename_only
-from urllib import response
 from fastapi import FastAPI, status ,HTTPException, File, UploadFile
 import shutil
 import os
-import numpy as np
 from fastapi.responses import JSONResponse
 from bson.objectid import ObjectId
 from TextSummarization.tclustering import gen_summary
 from VideoSummarization.vclustering import vsum
-from models.summary import Article,Vidpath,Transcript
-from schemas.summary import summaryEntity,vsummaryEntity
+from entities.apimodels import Article,Vidpath,Transcript
+from entities.dbschemas import summaryEntity,vsummaryEntity
 from Transcription.videofuncs import getmd, upload, getdir
-from helper import calc_clusters
+from VideoSummarization.url_downloader import download_url
+from helper import calc_clusters,dirgetcheck
 from bson import json_util
 import json
 from fastapi.middleware.cors import CORSMiddleware
 from config.db import conn, start
 from Transcription.youtube_transcribe import get_yt_transcript
-
+from typing import  Optional
 db = conn.Vidsum
 start()
 def parse_json(data):
@@ -38,7 +35,6 @@ app.add_middleware(
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile = File(...)):
     dir = getdir(file)
-    print(dir)
     if dir == 'Invalid':
         return {"message": "Filetype not supported"}
     destination = os.path.join(dir,file.filename)
@@ -48,20 +44,9 @@ async def create_upload_file(file: UploadFile = File(...)):
     finally:
         transcription = upload(destination,db)
         duration, ofps = getmd(destination)
-        #v_clusters,t_clusters = calc_clusters(duration,ofps)
+        v_clusters,t_clusters = calc_clusters(duration,ofps)
         file.file.close()
-    return {"transcript": transcription, "dpath":destination}
-
-@app.post("/getfrompath/")
-async def create_file(path:str):
-    #print(path)
-    #transcription = upload(path,db,upload=False)
-    print("Here")
-    transcription= {"0.0":"Hello"}
-    duration, ofps = getmd(path)
-    v_clusters,t_clusters = calc_clusters(duration,ofps)
-    print("Here2")
-    return {"transcript": transcription, "dpath":path, 'v_clusters':v_clusters, 't_clusters':t_clusters}
+    return {"transcript": transcription, "dpath":destination, 'v_clusters':v_clusters, 't_clusters':t_clusters}
 
 @app.post("/vsummary", response_description="Post path for video summary")
 async def vsummary(path: Vidpath):
@@ -76,9 +61,7 @@ async def vsummary(path: Vidpath):
 
 @app.post("/summary", response_description="Post article for summary")
 async def summary(article:Article):
-   
     article = article.dict()
-   # print(article)
     if( article_db := db.Article.find_one({"article": article['article']}) ) is not None:
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=parse_json(article_db)['_id']['$oid'])
     ordering = gen_summary(article['article'],article['fpath'],article['t_clusters'])
@@ -89,10 +72,17 @@ async def summary(article:Article):
 
 @app.post("/link", response_description="To pass the link to a youtube video",response_model=dict)
 async def transcript_post(link:Transcript):
-    print(link)
     link = link.dict()
-    file_name = get_yt_transcript(link['url'])
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content=file_name)
+    dir=dirgetcheck('Data','videos')
+    destination=download_url(link['url'],dir)
+   
+    try: 
+        transcription = get_yt_transcript(link['url'])
+    except:
+        transcription = upload(destination,db)
+    duration, ofps = getmd(destination)
+    v_clusters,t_clusters = calc_clusters(duration,ofps)
+    return {"transcript": transcription, "dpath":destination, 'v_clusters':v_clusters, 't_clusters':t_clusters}
 
 @app.get('/tresult/{id}',response_description="Retrieves the summary", response_model=dict)
 async def tresult(id:str):

@@ -7,6 +7,7 @@ import moviepy.editor as mp
 from helper import dirgetcheck
 
 def getmd(ip):
+    print(ip)
     cap = cv2.VideoCapture(ip)
     fps = cap.get(cv2.CAP_PROP_FPS)
     dur = cap.get(cv2.CAP_PROP_FRAME_COUNT)/fps
@@ -29,7 +30,6 @@ def upload(ip,db,upload=True):
         else:
             with open(ip, "rb") as file:
                 info = fleep.get(file.read(128))
-            print(info.extension)
             end = 0 - len(info.extension[0])
             fname = ip.split("\\")[-1][:end]+"mp3"
             nfname = os.path.join(dir,fname)
