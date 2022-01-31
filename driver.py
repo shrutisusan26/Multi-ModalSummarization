@@ -6,6 +6,7 @@ from baas_api import app
 import os
 from Transcription.process_transcript import process_yttranscript
 import json
+import urllib3
 
 client = TestClient(app)
 localhost="http://127.0.0.1:8000/"
@@ -18,7 +19,7 @@ for videos in paths:
 
     print(response['transcript'])
 
-    url = r"https://www.youtube.com/watch?v=pN3jRihVpGk&list=PLKiU8vyKB6ti1_rUlpZJFdPaxT04sUIoV&index=1"
+    url = urllib3.parse.quote("https://www.youtube.com/watch?v=pN3jRihVpGk&list=PLKiU8vyKB6ti1_rUlpZJFdPaxT04sUIoV&index=1")
     req=client.post(localhost+"link",params={'url':str(url)})
     print(req.status_code)
     assert req.status_code == 201
