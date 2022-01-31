@@ -74,7 +74,12 @@ def dirgetcheck(main,sub):
         os.makedirs(dir)
     return dir
 
-def getclusters(data):
-    obj = OptimalClusters(data,15,30)
+def getclusters(data,t_clusters,range):
+    if t_clusters>=range:
+        min_clusters = t_clusters-range
+    else:
+        min_clusters = 1
+    max_clusters = t_clusters+range
+    obj = OptimalClusters(data,min_clusters,max_clusters)
     return obj.gap_statistic()
         
