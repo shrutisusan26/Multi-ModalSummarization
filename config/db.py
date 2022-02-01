@@ -6,6 +6,9 @@ mongodb_key = os.getenv('mongodb_key')
 conn = MongoClient(mongodb_key)
 
 def start():
+    """
+    Startup function to create the Data directory on the server.
+    """
     dir = os.path.join(os.getcwd(),'Data')
     if not os.path.isdir(dir):
         os.makedirs(dir)

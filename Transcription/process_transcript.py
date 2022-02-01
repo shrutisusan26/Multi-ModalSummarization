@@ -1,12 +1,30 @@
 import json
 from TextSummarization.sentence_preprocessing import check_sentence_length
 
-
 def clean(sentences):
+    """
+    A function to remove sentences having less than 3 words.
+
+    Args:
+        sentences (dict): Dictionary containing timestamps and transcript sentences.
+
+    Returns:
+        sentence (dict): Dictionary with timestamps and sentences more than 3 words in length.
+    """
     sentence = {key:val for key, val in sentences.items() if check_sentence_length(val.split())}
     return sentence
     
 def readj(name):
+    """
+    A function to parse through a text transcript returned from Azure's speech to text API 
+    and create a dictionary containing timestamps and their sentences.
+
+    Args:
+        name (str): File path to transcript.
+
+    Returns:
+        sentneces (dict): Contains timestamps and their sentences.
+    """
     with open(name) as f:
         data = json.load(f)
     phrases = data['recognizedPhrases']
@@ -36,6 +54,17 @@ def readj(name):
     return sentences
 
 def process_yttranscript(transcript):
+    """
+    A function to parse through a text transcript returned from Youtube's transcript API 
+    and create a dictionary containing timestamps and their sentences.
+
+    Args:
+        transcript (dict): A dictionary containing the values returned by Youtube's 
+        transcript API.
+
+    Returns:
+        processed (dict): Contains timestamps and their sentences.
+    """
     curr_sentence = []
     processed = {}
     flag = 1

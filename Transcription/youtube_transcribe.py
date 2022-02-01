@@ -1,7 +1,15 @@
 from  youtube_transcript_api import YouTubeTranscriptApi
 
-
 def get_yt_transcript(url):
+    """
+    A function to download a transcript from a youtube video link.
+
+    Args:
+        url (str): Link to video.
+
+    Returns:
+        sentences (dict): Containg transcript and metadata received from Youtube Transcript API.
+    """
     try:
         _id = url.split("=")[1].split("&")[0]
     

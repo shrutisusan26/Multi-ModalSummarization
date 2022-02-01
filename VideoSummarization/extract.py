@@ -7,6 +7,14 @@ import torch.nn.functional as F
 import gc
 
 def get_feat(video_path,fr, output_file):
+    """
+    Function to process the video stream and convert it into an np array of features
+
+    Args:
+        video_path (str): File path.
+        fr (int): Frame rate used to process the video.
+        output_file (str): Path to file containg the features.
+    """
     dataset = VideoLoader(
         video_path,
         framerate=fr,
