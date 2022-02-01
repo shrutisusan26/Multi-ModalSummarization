@@ -56,11 +56,9 @@ async def create_upload_file(file: UploadFile = File(...)):
 async def create_file(path:str):
     #print(path)
     #transcription = upload(path,db,upload=False)
-    print("Here")
     transcription= {"0.0":"Hello"}
     duration, ofps = getmd(path)
     v_clusters,t_clusters = calc_clusters(duration,ofps)
-    print("Here2")
     return {"transcript": transcription, "dpath":path, 'v_clusters':v_clusters, 't_clusters':t_clusters}
 
 @app.post("/vsummary", response_description="Post path for video summary")
