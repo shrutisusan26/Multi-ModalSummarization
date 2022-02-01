@@ -104,7 +104,7 @@ async def transcript_post(link:Transcript):
     link = link.dict()
     dir=dirgetcheck('Data','videos')
     destination=download_url(link['url'],dir)
-   
+    print(destination)
     try: 
         transcription = get_yt_transcript(link['url'])
     except:

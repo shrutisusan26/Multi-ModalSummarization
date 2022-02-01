@@ -58,6 +58,7 @@ def upload(ip,db,upload=True):
             audio = AudioSegment.from_file(ip, info.extension[0])
             audio.export(nfname, format="mp3")
             blob_name = fname
+    print(blob_name)
     return (uploadtoaz(db,blob_name,dir))
 
 def getdir(file):

@@ -76,8 +76,8 @@ class Preprocessing(object):
         Returns:
             tensor (np arr): Processed Array of video features.
         """
-            tensor = self._zero_pad(tensor, 16)
-            tensor = self.norm(tensor)
-            tensor = tensor.view(-1, 16, 3, 112, 112)
-            tensor = tensor.transpose(1, 2)
-            return tensor
+        tensor = self._zero_pad(tensor, 16)
+        tensor = self.norm(tensor)
+        tensor = tensor.view(-1, 16, 3, 112, 112)
+        tensor = tensor.transpose(1, 2)
+        return tensor
