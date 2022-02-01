@@ -15,6 +15,10 @@ from helper import getclusters
 
 
 def req(sentences):
+    """
+    Returns:
+       sentence_embedding[Dict]: Sentence embeddings from BERT & TFIDF
+    """
     model = BertModel.from_pretrained('bert-base-uncased',
                                     output_hidden_states = True, # Whether the model returns all hidden-states.
                                     )
@@ -23,6 +27,16 @@ def req(sentences):
     return sentence_embedding['sentence_embedding']
 
 def lsa(kmeans,n_clusters,sentences):
+    """
+    Returns  a score for each sentence after topic modelling with LSA
+    Args:
+        kmeans ([object]):  kmeans clusters
+        n_clusters ([int]): Optimal number of clusters
+        sentences ([Dict]): Dictionary  of sentences with timestamp
+
+    Returns:
+       summ([string]): Summary sentences 
+    """
     summ =[]
     for id in range(n_clusters):
         cluster_sents=[]
@@ -56,12 +70,19 @@ def lsa(kmeans,n_clusters,sentences):
     return summ
 
 def gen_summary(sentences,ip,n_clusters):
+    """
+    Generates summary sentences after clustering with KMeans, context sentences
+    rake key phrase extraction  & LSA for topic modelling 
+    Args:
+        sentences (Dict): Dictionary  of sentences with timestamp
+        ip (string): Path  to the video file location om server
+        n_clusters ([int]): Optimal number of clusters 
+    Returns:
+        [list]: summary sentences
+    """
     dir = dirgetcheck('Data','feat_op')
     opn = ip.split("\\")[-1].split('.')[0]
     opn = re.sub(r'[\.\\:]','',opn)
-    # opn = opn.replace(r'\.','')
-    # opn = opn.replace('\\','')
-    # opn = opn.replace(':','')
     output_file = opn+'tvop.npy'
     output_file = os.path.join(dir,output_file)
     list_sentences = list(sentences.values())

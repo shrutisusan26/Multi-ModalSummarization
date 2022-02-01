@@ -8,6 +8,14 @@ import os
 from helper import dirgetcheck
 
 def report_gen(report_dic,ip,fr):
+    """
+    Generates a .pdf out of  aligned key sentences & frames
+
+    Args:
+        report_dic ([Dict]): Combined summariers wrt to the timestamps with frames as keys and summary sents as vals
+        ip ([string]): path of the original video location on the server
+        fr ([int]): frame rate of the video
+    """
     dir = dirgetcheck('Data','output_images')
     doc = SimpleDocTemplate(os.path.join(os.getcwd(),'reports',ip.split("\\")[-1].split('.')[0]+".pdf"),pagesize=A4,
                         rightMargin=72,leftMargin=72,
