@@ -1,5 +1,4 @@
 import shutil
-from typing import OrderedDict
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import pairwise_distances_argmin_min
@@ -9,7 +8,7 @@ import cv2
 import os 
 import shutil
 from helper import dirgetcheck, getclusters
-
+import re
 def cosine_distance_between_two_images(v1, v2):
     return (1- scipy.spatial.distance.cosine(v1, v2))
 
@@ -45,14 +44,14 @@ def vsum(ip,n_clusters):
     dir2 = dirgetcheck('Data','feat_op')
     fr = getfr(ip)
     opn = ip.split("\\")[-1].split('.')[0]
-    opn = opn.replace(r'\.','')
-    opn = opn.replace('\\','')
-    opn = opn.replace(':','')
+    opn=re.sub(r'[.\:]','',opn)
+    # opn = opn.replace(r'\.','')
+    # opn = opn.replace('\\','')
+    # opn = opn.replace(':','')
     output_file = opn+'op.npy'
     output_file = os.path.join(dir2,output_file)
     clean(dir1,output_file) 
     get_feat(ip,fr,output_file)
-    print(output_file)
     op = np.load(output_file)
     n_clusters = getclusters(op,n_clusters)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)

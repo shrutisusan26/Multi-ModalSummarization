@@ -1,11 +1,10 @@
 from  youtube_transcript_api import YouTubeTranscriptApi
-import json
- 
+
 
 def get_yt_transcript(url):
     try:
         _id = url.split("=")[1].split("&")[0]
-        print(_id)
+    
     except:
         print("Invalid link")
 
@@ -13,10 +12,9 @@ def get_yt_transcript(url):
     sentences={}
     for sent in transcripts[0][_id]:
         sentences[sent['start']]=sent['text']
-    with open(f'{_id}.json', 'w', encoding='utf-8') as json_file:
-            json.dump(sentences, json_file)
-    return f'{_id}.json'
+   
+    return sentences
             
 if __name__=="__main__":
-    example_url = "https://www.youtube.com/watch?v=pN3jRihVpGk&list=PLKiU8vyKB6ti1_rUlpZJFdPaxT04sUIoV&index=1"
+    example_url = "https://www.youtube.com/watch?v=qLvwlsCjMfY&ab_channel=TheMysticaLand"
     get_yt_transcript(example_url)

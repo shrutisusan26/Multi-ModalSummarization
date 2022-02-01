@@ -1,21 +1,13 @@
-import imp
-import requests
-from multiprocessing import Pool
 from TextSummarization.rake_transcript import rake_transcript
 import numpy as np
 from sklearn.cluster import KMeans
-import re
-from sklearn.metrics import pairwise_distances_argmin_min
 from sklearn.feature_extraction.text import TfidfVectorizer
-import time
 from TextSummarization.baas import generate_sentence_embeddings
 from transformers import BertModel
-import json
 from helper import dirgetcheck
 import os
 from TextSummarization.sentence_preprocessing import preprocess
 from sklearn.decomposition import  TruncatedSVD
-import nltk
 from nltk.corpus import stopwords
 stop_words = set(stopwords.words('english'))
 import re
@@ -40,7 +32,6 @@ def lsa(kmeans,n_clusters,sentences):
         vectorizer = TfidfVectorizer(stop_words=stop_words,max_features=1000)
         if len(cluster_sents) > 1:
             X = vectorizer.fit_transform(cluster_sents)
-            #print(X.shape)
             lsa_model = TruncatedSVD(n_components=1, algorithm='randomized', n_iter=10, random_state=42)
             lsa_top=lsa_model.fit_transform(X)
             vocab = vectorizer.get_feature_names()
@@ -58,8 +49,7 @@ def lsa(kmeans,n_clusters,sentences):
                         sent_score[i]+=k[j]
                     except:
                         continue
-            #print(sent_score)
-            #print(sent_score.index(max(sent_score)))
+
             summ.append(cluster[sent_score.index(max(sent_score))])
         else:
             summ.append(cluster[0])
@@ -68,24 +58,20 @@ def lsa(kmeans,n_clusters,sentences):
 def gen_summary(sentences,ip,n_clusters):
     dir = dirgetcheck('Data','feat_op')
     opn = ip.split("\\")[-1].split('.')[0]
-    opn = opn.replace(r'\.','')
-    opn = opn.replace('\\','')
-    opn = opn.replace(':','')
+    opn = re.sub(r'[\.\\:]','',opn)
+    # opn = opn.replace(r'\.','')
+    # opn = opn.replace('\\','')
+    # opn = opn.replace(':','')
     output_file = opn+'tvop.npy'
     output_file = os.path.join(dir,output_file)
     list_sentences = list(sentences.values())
     preprocessed_sentences = preprocess(list_sentences)
-    print(len(preprocessed_sentences))
     sentence_embed=req(preprocessed_sentences)
     n_clusters = getclusters(sentence_embed,n_clusters)
     keyphrases = rake_transcript(list_sentences)
     vectors = np.array(sentence_embed)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
-    print(vectors.shape)
     kmeans = kmeans.fit(vectors)
-    #closest = []
-    #closest, _ = pairwise_distances_argmin_min(kmeans.cluster_centers_,vectors)
-    #ordering = [closest[idx].item() for idx in range(n_clusters)]
     ordering = lsa(kmeans,n_clusters,sentences)
     ordering = sorted(ordering)
     flag = 0
@@ -124,32 +110,6 @@ def gen_summary(sentences,ip,n_clusters):
     ordering = sorted(list(n_ordering))        
     summary_sentences = {j[0]:j[1] for i,j in enumerate(sentences.items()) if i in ordering}
     summary_vectors = [vectors[i] for i in ordering]
-    # labels = np.zeros(len(sentences))
-    # labels[np.array(ordering)] = 1
-    
-    # print(labels)
-    # if not os.path.exists("train_data.npy"):
-    #     with open("train_data.npy", 'wb') as file:
-    #         np.save(file, summary_vectors)
-    #     with open("labels.npy", 'wb') as file:
-    #         np.save(file, labels)
-            
-    # else:
-    #     with open("train_data.npy","rb") as file:
-    #         preloaded_data = np.load(file)
-    #         preloaded_data = np.concatenate((preloaded_data,summary_vectors))
-            
-    #     with open("train_data.npy","wb") as file:
-    #         np.save(file, preloaded_data)
-            
-    #     with open("labels.npy","rb") as file:
-    #         preloaded_labels = np.load(file)
-    #         preloaded_labels = np.concatenate((preloaded_labels,labels))
-        
-    #     with open("labels.npy","wb") as file:
-    #         np.save(file, preloaded_labels)
-
-    print(summary_sentences)
     print('Clustering Finished')
     np.save(output_file,summary_vectors)
     return summary_sentences     

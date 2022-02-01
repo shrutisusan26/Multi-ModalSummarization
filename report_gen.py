@@ -1,4 +1,3 @@
-import time
 from reportlab.lib.enums import TA_JUSTIFY
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
@@ -35,11 +34,9 @@ def report_gen(report_dic,ip,fr):
             if val!={}:
                 summ = ''
                 for time,sent in val.items():
-                #print(sent)
                     summ+=sent
             else:
                 summ = ''
-            #(str(key)+' : '+ summ)
             Story.append(Paragraph(summ, styles["Normal"]))
             Story.append(Spacer(1, 12))
         except:
