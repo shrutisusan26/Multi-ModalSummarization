@@ -17,14 +17,14 @@ def get_frame(ip,fr,frame_num):
     scale = float(16*fps/fr)
 
 
-    
-    cap.set(1, frame_num*scale)
-    ret, frame = cap.read()
-    if not ret:
-        print("ERR")
-    return face_detector(frame,0.05)
-    # except:
-    #     print("Face Detection gone wrong")
+    try:
+        cap.set(1, frame_num*scale)
+        ret, frame = cap.read()
+        if not ret:
+            print("ERR")
+        return face_detector(frame,0.05)
+    except:
+        print("Face Detection gone wrong")
 def cosine_distance_between_two_images(v1, v2):
     """
     Calculates cosine similarity between 2 vectors.
