@@ -11,20 +11,28 @@ from helper import dirgetcheck, getclusters
 import re
 from VideoSummarization.face_detector import face_detector
 
-def get_frame(ip,fr,frame_num):
+def get_frame(ip,fr,op):
     cap = cv2.VideoCapture(ip)
     fps = cap.get(cv2.CAP_PROP_FPS)
     scale = float(16*fps/fr)
-
-
-    try:
-        cap.set(1, frame_num*scale)
+    area_arr=[]
+    run_avg = 0
+    for i in range(len(op)):
+        cap.set(1, i*scale)
         ret, frame = cap.read()
         if not ret:
             print("ERR")
-        return face_detector(frame,0.05)
-    except:
-        print("Face Detection gone wrong")
+        area_arr.append(face_detector(frame))
+        run_avg+=area_arr[i]
+    run_avg = run_avg/i
+    processed_frames = []
+    frame_no=[]
+    for i, vector in enumerate(op):
+        if area_arr[i]<=run_avg:
+            processed_frames.append(vector)
+            frame_no.append(i)
+    return processed_frames,frame_no
+    
 def cosine_distance_between_two_images(v1, v2):
     """
     Calculates cosine similarity between 2 vectors.
@@ -111,23 +119,14 @@ def vsum(ip,n_clusters):
     fr = getfr(ip)
     opn = ip.split("\\")[-1].split('.')[0]
     opn=re.sub(r'[.\:]','',opn)
-    # opn = opn.replace(r'\.','')
-    # opn = opn.replace('\\','')
-    # opn = opn.replace(':','')
     output_file = opn+'op.npy'
     output_file = os.path.join(dir2,output_file)
     clean(dir1,output_file) 
     get_feat(ip,fr,output_file)
     op = np.load(output_file)
     
-    preprocessed_frames = []
-    frame_no = []
-    
-    for i, vector in enumerate(op):
-        if not get_frame(ip,fr,i):
-            preprocessed_frames.append(vector)
-            frame_no.append(i)
-            
+    preprocessed_frames,frame_no=get_frame(ip,fr,op)
+    preprocessed_frames = np.array(preprocessed_frames)           
     n_clusters = getclusters(preprocessed_frames,n_clusters)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     kmeans = kmeans.fit(op)

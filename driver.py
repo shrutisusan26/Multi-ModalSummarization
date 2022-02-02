@@ -9,7 +9,7 @@ from Transcription.process_transcript import readj
 client = TestClient(app)
 localhost="http://127.0.0.1:8000/"
 path= r"E:\Multi-Modal Summarization\Data\videos"
-paths=['neon.mp4' ]
+paths=['fc.mp4' ]
 for videos in paths:
 
 
@@ -17,7 +17,7 @@ for videos in paths:
     # req=client.post(localhost+"link",json={"url":url})
     # assert req.status_code == 201
     # response=req.json()
-    transcr = r'E:\Multi-Modal Summarization\Data\trans\0f3839c1-6eee-4e58-b4b5-5a773564b533result.json'
+    transcr = r'E:\Multi-Modal Summarization\Data\trans\edd60f58-2f89-42be-abb2-8b89ef99f166result.json'
 
     summary_id= client.post(localhost+"summary",json={"article": readj(transcr),"t_clusters":20,"fpath":os.path.join(path,videos),"order": {}})
     assert summary_id.status_code == 201
