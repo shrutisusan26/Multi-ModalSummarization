@@ -5,7 +5,7 @@ def check_face_loc(img_h,img_w,x,y,w,h):
     img_center = x+w/2,y+h/2
     bounds = x_center-img_w/4,x_center+img_w/4,y_center-img_h/4,y_center+img_h/4
 
-    if img_center[0]>=bounds[0] and img_center[0]<=bounds[1] and img_center[1]>=bounds[2] and img_center[1]<=bounds[3]:
+    if img_center[0]>=bounds[0] and img_center[0]<=bounds[1]:
         return True
     else:
         return False
