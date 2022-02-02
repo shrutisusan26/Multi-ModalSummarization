@@ -9,8 +9,22 @@ import os
 import shutil
 from helper import dirgetcheck, getclusters
 import re
-from face_detector import face_detector
+from VideoSummarization.face_detector import face_detector
 
+def get_frame(ip,fr,frame_num):
+    cap = cv2.VideoCapture(ip)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    scale = float(16*fps/fr)
+
+
+    
+    cap.set(1, frame_num*scale)
+    ret, frame = cap.read()
+    if not ret:
+        print("ERR")
+    return face_detector(frame,0.05)
+    # except:
+    #     print("Face Detection gone wrong")
 def cosine_distance_between_two_images(v1, v2):
     """
     Calculates cosine similarity between 2 vectors.
@@ -111,7 +125,7 @@ def vsum(ip,n_clusters):
     closest = []
     closest, _ = pairwise_distances_argmin_min(kmeans.cluster_centers_,op)
     print(closest)
-    ordering = [closest[idx].item() for idx in range(n_clusters)]
+    ordering = [closest[idx].item() for idx in range(n_clusters) if not get_frame(ip,fr,closest[idx].item())]
     keyframes_vectors = [op[i] for i in ordering]
     print('Clustering Finished')
     np.save(output_file,keyframes_vectors)

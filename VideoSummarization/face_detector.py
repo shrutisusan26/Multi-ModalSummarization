@@ -10,13 +10,14 @@ def check_face_loc(img_h,img_w,x,y,w,h):
     else:
         return False
 
-def face_detector(img_name,threshold=0.2):
-    face_cascade = cv2.CascadeClassifier('face_detector.xml')
-    img = cv2.imread(img_name)
-    
+def face_detector(img,threshold=0.2):
+    face_cascade = cv2.CascadeClassifier(r'E:\Multi-Modal Summarization\VideoSummarization\face_detector.xml')
+
+    if type(img)==str:
+        img = cv2.imread(img)
     img_h,img_w,_ = img.shape
     original_area = img_h*img_w
-    
+
     faces = face_cascade.detectMultiScale(img, 1.1, 4)
     
     if len(faces)==0:

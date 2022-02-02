@@ -1,5 +1,5 @@
 import json
-#from TextSummarization.sentence_preprocessing import check_sentence_length
+from TextSummarization.sentence_preprocessing import check_sentence_length
 
 def clean(sentences):
     """
