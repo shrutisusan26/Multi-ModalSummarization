@@ -19,7 +19,114 @@ LOCALE = "en-US"
 container_name = 'forlecture'
 account_name = config.storage_name
 account_key = config.storage_key
+
+def _paginate(api, paginated_object):
+    """
+    This function returns a generator over all items of the array that 
+    the paginated object `paginated_object` is part of.
+
+    Raises:
+        Exception: If data could not be found.
+
+    Yields:
+        Array: Contains the paginated objects data.
+    """
+    yield from paginated_object.values
+    typename = type(paginated_object).__name__
+    auth_settings = ["apiKeyHeader", "apiKeyQuery"]
+    while paginated_object.next_link:
+        link = paginated_object.next_link[len(
+            api.api_client.configuration.host):]
+        paginated_object, status, headers = api.api_client.call_api(link, "GET",
+                                                                    response_type=typename, auth_settings=auth_settings)
+        if status == 200:
+            yield from paginated_object.values
+        else:
+            raise Exception(
+                f"could not receive paginated data: status {status}")
+
+def transcribe(url_with_sas,blob_name,db):
+    """
+    Starts a speech to text API on a blob uploaded to azure.
+
+    Args:
+        url_with_sas (str): URL to the uploaded blob with SAS token appended.
+        blob_name (str): Name of blob.
+        db (MongoClient): Client that allows CRUB operations on database.
+    
+    Returns:
+        results (dict): Containing timestamps and transcript sentences.
+    """
+    configuration = cris_client.Configuration()
+    configuration.api_key["Ocp-Apim-Subscription-Key"] = SUBSCRIPTION_KEY
+    configuration.host = f"https://{SERVICE_REGION}.api.cognitive.microsoft.com/speechtotext/v3.0"
+
+    client = cris_client.ApiClient(configuration)
+    api = cris_client.DefaultApi(api_client=client)
+    if(transcription_id := db.trans.find_one({"blob_name": blob_name}) is None):
+        properties = {
+            "wordLevelTimestampsEnabled": True,
+            "diarizationEnabled": True,
+            "destinationContainerUrl": config.container_sas_uri,
+        }
+        
+        transcription_definition = cris_client.Transcription(
+        display_name=blob_name[:-3],
+        description=DESCRIPTION,
+        locale=LOCALE,
+        content_urls=[url_with_sas],
+        properties=properties
+        )   
+
+        created_transcription, status, headers = api.create_transcription_with_http_info(
+            transcription=transcription_definition)
+
+        transcription_id = headers["location"].split("/")[-1]
+        completed = False
+
+        while not completed:
+            time.sleep(5)
+            transcription = api.get_transcription(transcription_id)
+            if transcription.status in ("Failed", "Succeeded"):
+                completed = True
+                item={'transcription_id':transcription_id,'blob_name':blob_name}
+                db.trans.insert_one(transEntity(item))
+    else:
+        transcription_id = db.trans.find_one({"blob_name": blob_name})
+        transcription_id = transcription_id['transcription_id']
+
+    transcription = api.get_transcription(transcription_id)
+    if transcription.status == "Succeeded":
+        pag_files = api.get_transcription_files(transcription_id)
+        for file_data in _paginate(api, pag_files):
+            if file_data.kind != "Transcription":
+                continue
+            global container_name
+            results_url = file_data.links.content_url.split(container_name)
+            blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
+            blob_client = blob_service_client.get_blob_client(container=container_name, blob=results_url[1][1:])
+            fname = transcription_id+'result.json'
+            dir = dirgetcheck('Data','trans')
+            with open(os.path.join(dir,fname),'wb') as dw:
+                dw.write(blob_client.download_blob().readall())
+            results = readj(os.path.join(dir,fname))
+            return results
+    elif transcription.status == "Failed":
+        results = 'Failed'
+        return results
+
 def uploadtoaz(db,blob_name,dir):  
+    """
+    A function to upload a blob to azure and triggers a speech to text API on it.
+
+    Args:
+        db (MongoClient): Allows database CRUD operations.
+        blob_name (str): Name of blob.
+        dir (str): Path to directory where file is stored.
+
+    Returns:
+        results (dict): Containing timestamps and transcript sentences.
+    """
     block_list=[]
     chunk_size=8192 
     blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
@@ -51,98 +158,6 @@ def uploadtoaz(db,blob_name,dir):
     results = transcribe(url_with_sas,blob_name,db)
     return results
 
-def transcribe_from_single_blob(uri, properties,blob_name):
-    transcription_definition = cris_client.Transcription(
-        display_name=blob_name[:-3],
-        description=DESCRIPTION,
-        locale=LOCALE,
-        content_urls=[uri],
-        properties=properties
-    )
-    return transcription_definition
-
-def _paginate(api, paginated_object):
-    """
-    The autogenerated client does not support pagination. This function returns a generator over
-    all items of the array that the paginated object `paginated_object` is part of.
-    """
-    yield from paginated_object.values
-    typename = type(paginated_object).__name__
-    auth_settings = ["apiKeyHeader", "apiKeyQuery"]
-    while paginated_object.next_link:
-        link = paginated_object.next_link[len(
-            api.api_client.configuration.host):]
-        paginated_object, status, headers = api.api_client.call_api(link, "GET",
-                                                                    response_type=typename, auth_settings=auth_settings)
-        if status == 200:
-            yield from paginated_object.values
-        else:
-            raise Exception(
-                f"could not receive paginated data: status {status}")
-
-def transcribe(url_with_sas,blob_name,db):
-  
-        # configure API key authorization: subscription_key
-    configuration = cris_client.Configuration()
-    configuration.api_key["Ocp-Apim-Subscription-Key"] = SUBSCRIPTION_KEY
-    configuration.host = f"https://{SERVICE_REGION}.api.cognitive.microsoft.com/speechtotext/v3.0"
-
-        # create the client object and authenticate
-    client = cris_client.ApiClient(configuration)
-
-        # create an instance of the transcription api class
-    api = cris_client.DefaultApi(api_client=client)
-    if(transcription_id := db.trans.find_one({"blob_name": blob_name}) is None):
-        # Specify transcription properties by passing a dict to the properties parameter. See
-        # https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription#configuration-properties
-        # for supported parameters.
-        #container_sas_uri="https://btspeechtotext.blob.core.windows.net/forlecture?sp=rwl&st=2022-01-13T12:19:12Z&se=2022-01-13T20:19:12Z&spr=https&sv=2020-08-04&sr=c&sig=1Rq5NVkqbemky12HeWaIHNpSr9kWb%2F8X7bgCUzjxn%2FM%3D"
-        properties = {
-            "wordLevelTimestampsEnabled": True,
-            "diarizationEnabled": True,
-            "destinationContainerUrl": config.container_sas_uri,
-        }
-        
-        transcription_definition = transcribe_from_single_blob(url_with_sas, properties, blob_name)
-
-        created_transcription, status, headers = api.create_transcription_with_http_info(
-            transcription=transcription_definition)
-
-        # get the transcription Id from the location URI
-        transcription_id = headers["location"].split("/")[-1]
-        completed = False
-
-        while not completed:
-        # wait for 5 seconds before refreshing the transcription status
-            time.sleep(5)
-
-            transcription = api.get_transcription(transcription_id)
-            if transcription.status in ("Failed", "Succeeded"):
-                completed = True
-                item={'transcription_id':transcription_id,'blob_name':blob_name}
-                db.trans.insert_one(transEntity(item))
-    else:
-        transcription_id = db.trans.find_one({"blob_name": blob_name})
-        transcription_id = transcription_id['transcription_id']
-    transcription = api.get_transcription(transcription_id)
-    if transcription.status == "Succeeded":
-        pag_files = api.get_transcription_files(transcription_id)
-        for file_data in _paginate(api, pag_files):
-            if file_data.kind != "Transcription":
-                continue
-            global container_name
-            results_url = file_data.links.content_url.split(container_name)
-            blob_service_client = BlobServiceClient.from_connection_string(config.connect_str)
-            blob_client = blob_service_client.get_blob_client(container=container_name, blob=results_url[1][1:])
-            fname = transcription_id+'result.json'
-            dir = dirgetcheck('Data','trans')
-            with open(os.path.join(dir,fname),'wb') as dw:
-                dw.write(blob_client.download_blob().readall())
-            results = readj(os.path.join(dir,fname))
-            return results
-    elif transcription.status == "Failed":
-        results = 'Failed'
-        return results
         
     
 

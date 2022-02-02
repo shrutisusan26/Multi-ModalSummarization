@@ -9,10 +9,31 @@ import os
 import shutil
 from helper import dirgetcheck, getclusters
 import re
+
 def cosine_distance_between_two_images(v1, v2):
+    """
+    Calculates cosine similarity between 2 vectors.
+
+    Args:
+        v1 (np arr): Vector corresponding to a frame.
+        v2 (np arr): Vector corresponding to a frame.
+
+    Returns:
+        int: Cosine similarty between the 2 vectors.
+    """
     return (1- scipy.spatial.distance.cosine(v1, v2))
 
 def getfr(ip):
+    """
+    Function to calculate processing framerate with respect to memory 
+    limitatons.
+
+    Args:
+        ip (str): File path.
+
+    Returns:
+        int: Frame rate.
+    """
     stream = cv2.VideoCapture(ip)
     fps = stream.get(cv2.CAP_PROP_FPS)  
     frame_count = int(stream.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -27,6 +48,17 @@ def getfr(ip):
         return lt[-1]
 
 def redundancy_checker(ordering,op):
+    """
+    Function to detect redundant images out of all the keyframes.
+    Works on cosine similarity.
+
+    Args:
+        ordering (list): List containing indexes of keyframes.
+        op (np app): Numpy arr containing features of all the frames.
+
+    Returns:
+        final_list (list): List containg indexes of rendundancy removed keyframes.
+    """
     final_list=ordering.copy()
     for i in range(len(ordering)-1):
         if cosine_distance_between_two_images(op[ordering[i]],op[ordering[i+1]]) > 0.95:
@@ -34,12 +66,31 @@ def redundancy_checker(ordering,op):
     return final_list
         
 def clean(dir1,op):
+    """
+    Function to remove a particular file and all the files from a directory. 
+
+    Args:
+        dir1 (str): Path to directory.
+        op (str): Path to file.
+    """
     if os.path.isfile(op):
         os.remove(op)
     shutil.rmtree(dir1)
     os.makedirs(dir1)
 
 def vsum(ip,n_clusters):
+    """
+    Function to calculate and return keyframes.
+
+    Args:
+        ip (str): File path.
+        n_clusters (int): Baseline value of number of clusters to find optimum number.
+        of keyframes.
+
+    Returns:
+        ordering,fr,op.shape[0] (list,int,int): List containing indexes of keyframes, processing 
+        frame rate, number of chunks of size 16 in the entire video.
+    """
     dir1 = dirgetcheck('Data','output_images')
     dir2 = dirgetcheck('Data','feat_op')
     fr = getfr(ip)

@@ -7,6 +7,12 @@ from pytube import YouTube
 def is_downloadable(url):
     """
     Does the url contain a downloadable resource
+
+    Args:
+        url (str): Link to video
+
+    Returns:
+        bool: If the link is downloadable or not
     """
     h = requests.head(url, allow_redirects=True)
     header = h.headers
@@ -18,6 +24,16 @@ def is_downloadable(url):
     return True
 
 def download_url(url,dir=os.path.join(os.getcwd(),'Data/videos')):
+    """
+    To download youtube urls or otherwise
+
+    Args:
+        url (str): Link to file
+        dir ((str), optional): Saving directory. Defaults to os.path.join(os.getcwd(),'Data/videos').
+
+    Returns:
+        file_name (str): Name of the file
+    """
     if "youtube" in url:
  
         try: 

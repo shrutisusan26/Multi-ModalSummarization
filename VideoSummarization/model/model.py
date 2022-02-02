@@ -5,7 +5,6 @@ from VideoSummarization.model.resnext import resnet101
 from torch import nn
 import os
 
-
 class GlobalAvgPool(nn.Module):
     def __init__(self):
         super(GlobalAvgPool, self).__init__()

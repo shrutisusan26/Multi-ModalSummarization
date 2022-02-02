@@ -4,6 +4,16 @@ import numpy as np
 from TextSummarization.sentence_preprocessing import compute_tfidf, compute_word_weights
 
 def get_encodings_attention(sentences):
+    """ 
+    Computes tfids & generates encodings for sentences with   
+    padding  and attention mask along with [CLS] & [SEP] 
+    to input to BERT model
+    Args:
+        sentences ([list]): batch of sentences
+    Returns:
+        padded,attention_mask,sentences ([Array,Array,list]) : Pads sentences to the same length,
+        An array of 1's at locations where a token exists 0 otherwise, orginal sentences
+    """
     global tfidf
     global features
     tfidf, features = compute_tfidf(sentences)
@@ -21,6 +31,15 @@ def get_encodings_attention(sentences):
     return padded,attention_mask,sentences
 
 def generate_sentence_embeddings(model,sentences):
+    """ 
+    Generates encodings using last 4 layers in BERT and TFIDF weight for all sentences
+    Args:
+        model ([Model]): Bert Pretrained Model
+        sentences ([list]): All sentences
+
+    Returns:
+        sent_vec[tensor]: Embedding Vectors for sentences
+    """
     padded,attention_mask,sentences = get_encodings_attention(sentences)
     input_ids = torch.tensor(padded)  
     attention_mask = torch.tensor(attention_mask)

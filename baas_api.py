@@ -20,7 +20,35 @@ db = conn.Vidsum
 start()
 def parse_json(data):
     return json.loads(json_util.dumps(data))
-app = FastAPI()
+
+tags_metadata = [
+    {
+        "name": "upload_video",
+        "description": "Returns the transcript generated from the video with optimal number of text and video clusters determined",
+    },
+    {
+        "name": "video_summary",
+        "description": "Returns the _id of the extracted key frames after insertion into the database",
+    },
+    {
+        "name": "link",
+        "description": "API for extracting transcript from youtube videos with URLs ",
+    },
+    {
+        "name": "text_summary",
+        "description": "Determines the key sentences from the transcript and returns the _id of its entry in database",
+    },
+    {
+        "name": "video_order",
+        "description": "Returns the ordering of keyframes extracted after retrieving from database",
+    },
+    {
+        "name": "text_order",
+        "description": "Returns the ordering of keysentences extracted after retrieving from database"    }
+    
+]
+    
+app = FastAPI(openapi_tags=tags_metadata)
 origins = [
     "http://localhost:3000",
 ]
@@ -32,7 +60,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-@app.post("/uploadfile/")
+
+@app.post("/uploadfile/",tags=["upload_video"])
 async def create_upload_file(file: UploadFile = File(...)):
     dir = getdir(file)
     if dir == 'Invalid':
@@ -48,7 +77,7 @@ async def create_upload_file(file: UploadFile = File(...)):
         file.file.close()
     return {"transcript": transcription, "dpath":destination, 'v_clusters':v_clusters, 't_clusters':t_clusters}
 
-@app.post("/vsummary", response_description="Post path for video summary")
+@app.post("/vsummary", response_description="Post path for video summary",tags=["video_summary"])
 async def vsummary(path: Vidpath):
     path = path.dict()
     if( db_path := db.Vimage.find_one({"path": path}) ) is not None:
@@ -59,7 +88,7 @@ async def vsummary(path: Vidpath):
     item['id']= str(response.inserted_id)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=item['id'])
 
-@app.post("/summary", response_description="Post article for summary")
+@app.post("/summary", response_description="Post article for summary",tags=["text_summary"])
 async def summary(article:Article):
     article = article.dict()
     if( article_db := db.Article.find_one({"article": article['article']}) ) is not None:
@@ -70,12 +99,12 @@ async def summary(article:Article):
     item['id']= str(response.inserted_id)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=item['id'])
 
-@app.post("/link", response_description="To pass the link to a youtube video",response_model=dict)
+@app.post("/link", response_description="To pass the link to a youtube video",response_model=dict,tags=["link"])
 async def transcript_post(link:Transcript):
     link = link.dict()
     dir=dirgetcheck('Data','videos')
     destination=download_url(link['url'],dir)
-   
+    print(destination)
     try: 
         transcription = get_yt_transcript(link['url'])
     except:
@@ -84,13 +113,13 @@ async def transcript_post(link:Transcript):
     v_clusters,t_clusters = calc_clusters(duration,ofps)
     return {"transcript": transcription, "dpath":destination, 'v_clusters':v_clusters, 't_clusters':t_clusters}
 
-@app.get('/tresult/{id}',response_description="Retrieves the summary", response_model=dict)
+@app.get('/tresult/{id}',response_description="Retrieves the summary", response_model=dict,tags=["text_order"])
 async def tresult(id:str):
    if( article := db.Article.find_one({"_id": ObjectId(id)}) ) is not None:
         return article['order']
    raise HTTPException(status_code=404, detail=f"Article {id} not found")
 
-@app.get('/vresult/{id}',response_description="Retrieves the video images", response_model=dict)
+@app.get('/vresult/{id}',response_description="Retrieves the video images", response_model=dict,tags=["video_order"])
 async def vresult(id:str):
    if( path := db.Vimage.find_one({"_id": ObjectId(id)}) ) is not None:
         dictionary={'order':path['order'],'fr':path['fr'],'t_chunks':path['t_chunks']}

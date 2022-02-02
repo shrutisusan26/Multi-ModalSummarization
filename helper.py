@@ -39,6 +39,16 @@ class OptimalClusters:
     
     
 def calc_clusters(duration,fps):
+    """
+    Approximates video and text clusters to be a function of the duration of the entire video
+
+    Args:
+        duration ([int]): length of the entire video
+        fps ([int]): frames per second
+
+    Returns:
+        vc_clusters,text_clusters([int,int]): approximates 2.5 of sentences with each key frame
+    """
     total_frames = duration*fps
     
     if duration<=300:
@@ -61,6 +71,15 @@ def calc_clusters(duration,fps):
     return vc_clusters,text_clusters
 
 def dirgetcheck(main,sub):
+    """
+    Checks if a directory exists in a location and creates a directory if it doesn't exist
+    Args:
+        main ([string]): Parent directory
+        sub ([string]): Sub directory
+
+    Returns:
+        dir([path]) : path of the exisiting/created directory
+    """
     dir = os.path.join(os.getcwd(),main)
     dir = os.path.join(dir,sub)
     if not os.path.isdir(dir):
@@ -68,6 +87,16 @@ def dirgetcheck(main,sub):
     return dir
 
 def getclusters(data,n_clusters,range=5):
+    """
+    Takes in the baseline and calculates optimal number of clusters.
+    Args:
+        data ([Array]): Text/Video features
+        n_clusters ([int]): Baseline number of clusters
+        range (int, optional): range of values for KMeans training for gapstatistics . Defaults to 5.
+
+    Returns:
+        clusters([int]): optimal number of clusters
+    """
     if n_clusters>=range:
         min_clusters = n_clusters-range
     else:
