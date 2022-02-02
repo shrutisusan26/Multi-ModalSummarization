@@ -17,14 +17,14 @@ def get_frame(ip,fr,frame_num):
     scale = float(16*fps/fr)
 
 
-    
-    cap.set(1, frame_num*scale)
-    ret, frame = cap.read()
-    if not ret:
-        print("ERR")
-    return face_detector(frame,0.05)
-    # except:
-    #     print("Face Detection gone wrong")
+    try:
+        cap.set(1, frame_num*scale)
+        ret, frame = cap.read()
+        if not ret:
+            print("ERR")
+        return face_detector(frame,0.05)
+    except:
+        print("Face Detection gone wrong")
 def cosine_distance_between_two_images(v1, v2):
     """
     Calculates cosine similarity between 2 vectors.
@@ -119,7 +119,7 @@ def vsum(ip,n_clusters):
     clean(dir1,output_file) 
     get_feat(ip,fr,output_file)
     op = np.load(output_file)
-    preprocessed_frames = [op[i] for i in range(len(op)) if not get_frame(ip,fr,i) ]
+    preprocessed_frames = np.array([op[i] for i in range(len(op)) if not get_frame(ip,fr,i) ])
     n_clusters = getclusters(preprocessed_frames,n_clusters)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     kmeans = kmeans.fit(op)
