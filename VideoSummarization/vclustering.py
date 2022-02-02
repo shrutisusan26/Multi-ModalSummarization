@@ -119,13 +119,14 @@ def vsum(ip,n_clusters):
     clean(dir1,output_file) 
     get_feat(ip,fr,output_file)
     op = np.load(output_file)
-    n_clusters = getclusters(op,n_clusters)
+    preprocessed_frames = [op[i] for i in range(len(op)) if not get_frame(ip,fr,i) ]
+    n_clusters = getclusters(preprocessed_frames,n_clusters)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     kmeans = kmeans.fit(op)
     closest = []
-    closest, _ = pairwise_distances_argmin_min(kmeans.cluster_centers_,op)
+    closest, _ = pairwise_distances_argmin_min(kmeans.cluster_centers_,preprocessed_frames)
     print(closest)
-    ordering = [closest[idx].item() for idx in range(n_clusters) if not get_frame(ip,fr,closest[idx].item())]
+    ordering = [closest[idx].item() for idx in range(n_clusters)]
     keyframes_vectors = [op[i] for i in ordering]
     print('Clustering Finished')
     np.save(output_file,keyframes_vectors)
