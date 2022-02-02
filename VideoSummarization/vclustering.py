@@ -9,6 +9,7 @@ import os
 import shutil
 from helper import dirgetcheck, getclusters
 import re
+from face_detector import face_detector
 
 def cosine_distance_between_two_images(v1, v2):
     """
@@ -109,6 +110,7 @@ def vsum(ip,n_clusters):
     kmeans = kmeans.fit(op)
     closest = []
     closest, _ = pairwise_distances_argmin_min(kmeans.cluster_centers_,op)
+    print(closest)
     ordering = [closest[idx].item() for idx in range(n_clusters)]
     keyframes_vectors = [op[i] for i in ordering]
     print('Clustering Finished')
