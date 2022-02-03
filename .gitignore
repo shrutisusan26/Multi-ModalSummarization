@@ -115,3 +115,6 @@ config.py
 *.tar
 *.jsonl
 *.gz
+images/
+nptel/
+pdfs/

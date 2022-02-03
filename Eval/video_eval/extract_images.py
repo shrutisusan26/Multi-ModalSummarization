@@ -8,9 +8,9 @@ import os
 # file path you want to extract images from  
 # open the file
 
-for i in os.listdir(r"/pdfs/"):
-    pdf_file = fitz.open(r"/pdfs/"+i)
-    
+for i in os.listdir(r"../reports/Nptel/"):
+    pdf_file = fitz.open(r"../reports/Nptel/"+i)
+    os.mkdir(f"./nptel/{i}")
     # STEP 3
     # iterate over PDF pages
     for page_index in range(len(pdf_file)):
@@ -37,4 +37,4 @@ for i in os.listdir(r"/pdfs/"):
             image_ext = base_image["ext"]
             image = Image.open(io.BytesIO(image_bytes))
             # save it to local disk
-            image.save(open(f"{i[:-4]}_{page_index+1}_{image_index}.{image_ext}", "wb"))
+            image.save(open(f"nptel/{i}/{page_index+1}_{image_index}.{image_ext}", "wb"))

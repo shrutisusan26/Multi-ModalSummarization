@@ -24,5 +24,5 @@ def get_yt_transcript(url):
     return sentences
             
 if __name__=="__main__":
-    example_url = "https://www.youtube.com/watch?v=qLvwlsCjMfY&ab_channel=TheMysticaLand"
+    example_url = "https://www.youtube.com/watch?v=wbtpOhIP9Bc&t=67s&ab_channel=CrashCourse"
     get_yt_transcript(example_url)
