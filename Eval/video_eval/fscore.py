@@ -62,11 +62,8 @@ def calcfscore(afile,pfile):
 
 
 if __name__=="__main__":
-    p1 = r'E:\Multi-Modal Summarization\Eval\video_eval\images'
-    p2 = r'E:\Multi-Modal Summarization\Eval\video_eval\nptel'
-    for i in range(10):
-        if i != 8:
-            f1 = 'lec'+str(i+1)
-            f2 =  str(i+1)+'.pdf'
-            print(calcfscore(os.path.join(p1,f1),os.path.join(p2,f2)))
+    p1 = r'E:\Multi-Modal Summarization\Eval\video_eval\Generated_Keyframes'
+    p2 = r'E:\Multi-Modal Summarization\Eval\video_eval\Actual_Images'
+    for i in (os.listdir(p2)):
+            print(calcfscore(os.path.join(p1,i),os.path.join(p2,i)))
             print("lecture" + str(i))

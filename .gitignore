@@ -118,3 +118,6 @@ config.py
 images/
 nptel/
 pdfs/
+
+Actual*
+Generated*
