@@ -29,7 +29,7 @@ def face_detector(img,threshold=0.2):
             #print(check_face_loc(img_h,img_w,x,y,w,h))
             face_area+=w*h 
         area_occupied = face_area/original_area
-        print(area_occupied)
+        #print(area_occupied)
         return face_area
             
 
