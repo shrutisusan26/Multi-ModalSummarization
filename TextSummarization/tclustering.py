@@ -95,16 +95,6 @@ def gen_summary(sentences,ip,n_clusters):
     kmeans = kmeans.fit(vectors)
     ordering = lsa(kmeans,n_clusters,sentences)
     ordering = sorted(ordering)
-    flag = 0
-    for i in ordering:
-        for j in keyphrases:
-            if j[1] in list_sentences[i] and j[0]>20:
-                flag = 1
-                break
-        if flag==0:
-            ordering.remove(i)
-        else:
-            flag=0
     n_ordering =[]
     for i in ordering:
         n_ordering.append(i)
@@ -128,7 +118,17 @@ def gen_summary(sentences,ip,n_clusters):
             n_ordering.append(i+1)
             n_ordering.append(i+2)
     n_ordering=set(n_ordering)
-    ordering = sorted(list(n_ordering))        
+    ordering = sorted(list(n_ordering))
+    flag = 0
+    for i in ordering:
+        for j in keyphrases:
+            if j[1] in list_sentences[i] and j[0]>20:
+                flag = 1
+                break
+        if flag==0:
+            ordering.remove(i)
+        else:
+            flag=0        
     summary_sentences = {j[0]:j[1] for i,j in enumerate(sentences.items()) if i in ordering}
     summary_vectors = [vectors[i] for i in ordering]
     print('Clustering Finished')

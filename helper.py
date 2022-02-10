@@ -104,6 +104,6 @@ def getclusters(data,n_clusters,range=5):
     max_clusters = n_clusters+range
     obj = OptimalClusters(data,min_clusters,max_clusters)
     #clusters = obj.gap_statistic()
-    clusters = obj.elbow_visualizer()
+    clusters = obj.elbow_visualizer
     return clusters
         
