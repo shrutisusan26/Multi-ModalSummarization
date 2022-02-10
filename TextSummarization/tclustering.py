@@ -12,6 +12,24 @@ from nltk.corpus import stopwords
 stop_words = set(stopwords.words('english'))
 import re
 from helper import getclusters
+import scipy
+
+def cosine_distance_between_two_embeddings(v1, v2, th):
+    """
+    Calculates cosine similarity between 2 vectors.
+
+    Args:
+        v1 (np arr): Vector corresponding to a frame.
+        v2 (np arr): Vector corresponding to a frame.
+
+    Returns:
+        int: Cosine similarty between the 2 vectors.
+    """
+    cs = 1- scipy.spatial.distance.cosine(v1, v2)
+    if cs >=th:
+        return True
+    else:
+        return False
 
 
 def req(sentences):
@@ -99,24 +117,15 @@ def gen_summary(sentences,ip,n_clusters):
     for i in ordering:
         n_ordering.append(i)
         if i==0:
-            n_ordering.append(i+1)
-            n_ordering.append(i+2)
+            n_ordering += [v for v in [i+1,i+2] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.95)]
         if i==1:
-            n_ordering.append(i-1)
-            n_ordering.append(i+1)
-            n_ordering.append(i+2)
+            n_ordering += [v for v in [i-1,i+1,i+2] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.95)]
         if i == len(list_sentences)-1:
-            n_ordering.append(i-1)
-            n_ordering.append(i-2)
+            n_ordering += [v for v in [i-2,i-1] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.95)]
         if i == len(list_sentences)-2:
-            n_ordering.append(i-1)
-            n_ordering.append(i-2)
-            n_ordering.append(i+1)
+            n_ordering += [v for v in [i-2,i-1,i+1] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.95)]
         if i!=0 and i!=len(list_sentences)-1 and i!=1 and i!=len(list_sentences)-2:
-            n_ordering.append(i-1)
-            n_ordering.append(i-2)
-            n_ordering.append(i+1)
-            n_ordering.append(i+2)
+            n_ordering += [v for v in [i-2,i-1,i+1,i+2] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.95)]
     n_ordering=set(n_ordering)
     ordering = sorted(list(n_ordering))
     flag = 0
