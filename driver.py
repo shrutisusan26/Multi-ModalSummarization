@@ -11,7 +11,7 @@ client = TestClient(app)
 localhost="http://127.0.0.1:8000/"
 path= r"E:\Multi-Modal Summarization\Data\videos"
 tpath = r"E:\Multi-Modal Summarization\Data\trans"
-paths=['Intro.mp4','History.mp4','Imageform.mp4','Imagerepn.mp4','LinearFilt.mp4','Imagefreq.mp4','Imagesampl.mp4','Edgedet.mp4','Fromedge.mp4','Scalespaces.mp4' ]
+paths=['History.mp4' ]
 for i in range (len(paths)):
     videos = paths[i]
 
