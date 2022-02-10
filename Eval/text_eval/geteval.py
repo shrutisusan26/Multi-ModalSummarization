@@ -8,7 +8,7 @@ def test_text(list_of_pred, list_of_reference):
     #rouge = PyRouge(rouge_n=(1, 2, 4), rouge_l=True, rouge_w=True, rouge_w_weight=1.2, rouge_s=True, rouge_su=True, skip_gap=4)
     #score = rouge.evaluate(list_of_pred, list_of_reference)
 	rouge = Rouge()
-	score = rouge.get_scores(list_of_pred,list_of_reference)
+	score = rouge.get_scores(list_of_pred,list_of_reference,avg=True)
 	print(score)
 	return score
 	

@@ -26,7 +26,7 @@ def req(sentences):
     sentence_embedding = {"sentence_embedding":sentence_embedding}
     return sentence_embedding['sentence_embedding']
 
-def lsa(kmeans,n_clusters,sentences):
+def lsa(kmeans,n_clusters,sentences,all=False,ordering=[]):
     """
     Returns  a score for each sentence after topic modelling with LSA
     Args:
@@ -37,37 +37,64 @@ def lsa(kmeans,n_clusters,sentences):
     Returns:
        summ([string]): Summary sentences 
     """
-    summ =[]
-    for id in range(n_clusters):
-        cluster_sents=[]
-        cluster = np.where(kmeans.labels_ == id)[0]
-        cluster_sents.extend([list(sentences.values())[m] for m in cluster])
+    if not all:
+        summ =[]
+        for id in range(n_clusters):
+            cluster_sents=[]
+            cluster = np.where(kmeans.labels_ == id)[0]
+            cluster_sents.extend([list(sentences.values())[m] for m in cluster])
+            vectorizer = TfidfVectorizer(stop_words=stop_words,max_features=1000)
+            if len(cluster_sents) > 1:
+                X = vectorizer.fit_transform(cluster_sents)
+                lsa_model = TruncatedSVD(n_components=1, algorithm='randomized', n_iter=10, random_state=42)
+                lsa_top=lsa_model.fit_transform(X)
+                vocab = vectorizer.get_feature_names()
+                k = {}
+                for m, comp in enumerate(lsa_model.components_):
+                    vocab_comp = zip(vocab, comp)
+                    sorted_words = sorted(vocab_comp, key= lambda x:x[1], reverse=True)[:10]
+                    for t in sorted_words:
+                        k[t[0]] = 1
+                sent_score = [0]*len(cluster_sents)
 
-        vectorizer = TfidfVectorizer(stop_words=stop_words,max_features=1000)
-        if len(cluster_sents) > 1:
-            X = vectorizer.fit_transform(cluster_sents)
-            lsa_model = TruncatedSVD(n_components=1, algorithm='randomized', n_iter=10, random_state=42)
-            lsa_top=lsa_model.fit_transform(X)
-            vocab = vectorizer.get_feature_names()
-            k = {}
-            for m, comp in enumerate(lsa_model.components_):
-                vocab_comp = zip(vocab, comp)
-                sorted_words = sorted(vocab_comp, key= lambda x:x[1], reverse=True)[:10]
-                for t in sorted_words:
-                    k[t[0]] = 1
-            sent_score = [0]*len(cluster_sents)
+                for i in range(len(cluster_sents)):
+                    for j in cluster_sents[i].split():
+                        try:
+                            sent_score[i]+=k[j]
+                        except:
+                            continue
 
-            for i in range(len(cluster_sents)):
-                for j in cluster_sents[i].split():
-                    try:
-                        sent_score[i]+=k[j]
-                    except:
-                        continue
+                summ.append(cluster[sent_score.index(max(sent_score))])
+            else:
+                summ.append(cluster[0])
+    if all:
+        summ = ordering
+    sentsumm=[]
+    sentsumm.extend([list(sentences.values())[m] for m in summ])
+    vectorizer = TfidfVectorizer(stop_words=stop_words,max_features=1000)
+    X = vectorizer.fit_transform(sentsumm)
+    lsa_model = TruncatedSVD(n_components=1, algorithm='randomized', n_iter=10, random_state=42)
+    lsa_top=lsa_model.fit_transform(X)
+    vocab = vectorizer.get_feature_names()
+    k = {}
+    for m, comp in enumerate(lsa_model.components_):
+        vocab_comp = zip(vocab, comp)
+        sorted_words = sorted(vocab_comp, key= lambda x:x[1], reverse=True)[:10]
+        for t in sorted_words:
+            k[t[0]] = 1
+    sent_score = [0]*len(sentsumm)
 
-            summ.append(cluster[sent_score.index(max(sent_score))])
-        else:
-            summ.append(cluster[0])
-    return summ
+    for i in range(len(sentsumm)):
+        for j in sentsumm[i].split():
+            try:
+                sent_score[i]+=k[j]
+            except:
+                continue
+        sent_score[i]=sent_score[i]/len(sentsumm[i].split())
+    fsumm = [summ[i] for i in range(len(summ)) if sent_score[i]>0 ]
+    print(len(fsumm))
+    print(sent_score)
+    return fsumm
 
 def gen_summary(sentences,ip,n_clusters):
     """
@@ -95,41 +122,65 @@ def gen_summary(sentences,ip,n_clusters):
     kmeans = kmeans.fit(vectors)
     ordering = lsa(kmeans,n_clusters,sentences)
     ordering = sorted(ordering)
+    # flag = 0
+    # for i in ordering:
+    #     for j in keyphrases:
+    #         if j[1] in list_sentences[i] and j[0]>20:
+    #             flag = 1
+    #             break
+    #     if flag==0:
+    #         ordering.remove(i)
+    #     else:
+    #         flag=0
     n_ordering =[]
+    c_sent = []
+    print(ordering)
+    wc_sent = set(ordering)
     for i in ordering:
         n_ordering.append(i)
         if i==0:
             n_ordering.append(i+1)
             n_ordering.append(i+2)
+            c_sent.append(i+1)
+            c_sent.append(i+2)
         if i==1:
             n_ordering.append(i-1)
             n_ordering.append(i+1)
             n_ordering.append(i+2)
+            c_sent.append(i+1)
+            c_sent.append(i+2)
+            c_sent.append(i-1)
         if i == len(list_sentences)-1:
             n_ordering.append(i-1)
             n_ordering.append(i-2)
+            c_sent.append(i-1)
+            c_sent.append(i-2)
         if i == len(list_sentences)-2:
             n_ordering.append(i-1)
             n_ordering.append(i-2)
             n_ordering.append(i+1)
+            c_sent.append(i-1)
+            c_sent.append(i-2)
+            c_sent.append(i+1)
         if i!=0 and i!=len(list_sentences)-1 and i!=1 and i!=len(list_sentences)-2:
             n_ordering.append(i-1)
             n_ordering.append(i-2)
             n_ordering.append(i+1)
             n_ordering.append(i+2)
+            c_sent.append(i-1)
+            c_sent.append(i-2)
+            c_sent.append(i+1)
+            c_sent.append(i+2)
     n_ordering=set(n_ordering)
+    c_sent = set(c_sent)
+    oc_sent = c_sent-wc_sent
     ordering = sorted(list(n_ordering))
-    flag = 0
-    for i in ordering:
-        for j in keyphrases:
-            if j[1] in list_sentences[i] and j[0]>20:
-                flag = 1
-                break
-        if flag==0:
-            ordering.remove(i)
-        else:
-            flag=0        
+    ordering = lsa(kmeans,n_clusters,sentences,True,ordering)
+    ordering = sorted(ordering)
+
+    con_sents = {j[0]:j[1] for i,j in enumerate(sentences.items()) if i in sorted(list(oc_sent))}
     summary_sentences = {j[0]:j[1] for i,j in enumerate(sentences.items()) if i in ordering}
+    #print(con_sents)
     summary_vectors = [vectors[i] for i in ordering]
     print('Clustering Finished')
     np.save(output_file,summary_vectors)
