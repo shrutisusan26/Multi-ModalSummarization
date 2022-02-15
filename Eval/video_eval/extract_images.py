@@ -38,4 +38,4 @@ def getimages(odir,sdir):
     
 if __name__ =="__main__":
     getimages(r"../../reports/Nptel/",r'./Generated_Keyframes/')
-    getimages(r"../Dataset/pdfs",r'./Actual_Images/')
+    #getimages(r"../Dataset/pdfs",r'./Actual_Images/')
