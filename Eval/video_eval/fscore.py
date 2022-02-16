@@ -54,7 +54,7 @@ def calcfscore(afile,pfile):
     actual = imfeat(afile)
     pred = imfeat(pfile)
     tp,fp,fn = calc(actual,pred)
-    print(tp,fp,fn,len(pred))
+    print(tp,fp,fn,len(pred),len(actual))
     precision = tp /(tp+fp)
     recall = tp/(tp+fn)
     f = 2 * precision * recall /(precision + recall)
@@ -63,7 +63,11 @@ def calcfscore(afile,pfile):
 
 if __name__=="__main__":
     p1 = r'E:\Multi-Modal Summarization\Eval\video_eval\Generated_Keyframes'
-    p2 = r'E:\Multi-Modal Summarization\Eval\video_eval\Actual_Images'
+    p2 = r'E:\Multi-Modal Summarization\Eval\video_eval\Actual_Images\Simran annotated'
+    total =0
     for i in (os.listdir(p2)):
-            print(calcfscore(os.path.join(p2,i),os.path.join(p1,i)))
+            score,per = calcfscore(os.path.join(p2,i),os.path.join(p1,i))
+            print(score,per)
             print(str(i))
+            total+=score
+    print(total/len(os.listdir(p2)))
