@@ -45,7 +45,7 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
-
+*.jpg
 # Translations
 *.mo
 *.pot
@@ -82,7 +82,7 @@ celerybeat-schedule
 
 # SageMath parsed files
 *.sage.py
-
+*.csv
 # dotenv
 .env
 
@@ -122,3 +122,5 @@ pdfs/
 Actual*
 Generated*
 Dataset/
+*.pkl
+Everything/

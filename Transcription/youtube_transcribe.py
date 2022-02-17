@@ -1,4 +1,5 @@
 from  youtube_transcript_api import YouTubeTranscriptApi
+import json
 
 def get_yt_transcript(url):
     """
@@ -24,5 +25,6 @@ def get_yt_transcript(url):
     return sentences
             
 if __name__=="__main__":
-    example_url = "https://www.youtube.com/watch?v=wbtpOhIP9Bc&t=67s&ab_channel=CrashCourse"
-    get_yt_transcript(example_url)
+    example_url = "https://www.youtube.com/watch?v=h0e2HAPTGF4"
+    with open(r"E:\Multi-Modal Summarization\Data\trans\ml.json", "w") as f:
+        json.dump(get_yt_transcript(example_url),f)

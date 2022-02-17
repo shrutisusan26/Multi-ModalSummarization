@@ -10,6 +10,8 @@ import shutil
 from helper import dirgetcheck, getclusters
 import re
 from VideoSummarization.face_detector import face_detector
+import pandas as pd
+import skimage.io
 
 def get_frame(ip,fr,op):
     cap = cv2.VideoCapture(ip)
@@ -28,7 +30,7 @@ def get_frame(ip,fr,op):
     processed_frames = []
     frame_no=[]
     for i, vector in enumerate(op):
-        if area_arr[i]<=run_avg:
+        if area_arr[i]!=True and area_arr[i]<=run_avg:
             processed_frames.append(vector)
             frame_no.append(i)
     return processed_frames,frame_no
@@ -85,6 +87,7 @@ def redundancy_checker(ordering,op):
     final_list=ordering.copy()
     for i in range(len(ordering)-1):
         if cosine_distance_between_two_images(op[ordering[i]],op[ordering[i+1]]) > 0.95:
+            print(f"Removing {ordering[i]}")
             final_list.remove(ordering[i])
     return final_list
         
@@ -100,6 +103,40 @@ def clean(dir1,op):
         os.remove(op)
     shutil.rmtree(dir1)
     os.makedirs(dir1)
+
+def removeredundant(ordering,ip,fr):
+    print(ip)
+    cap = cv2.VideoCapture(ip)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    scale = float(16*fps/fr)
+    lst =[]
+    index = []
+    for i in ordering:
+        try:
+            cap.set(1, i*scale)
+            ret, frame = cap.read()
+            if not ret:
+                print("ERR")
+            fname="pic.jpg"
+            cv2.imwrite(fname, frame)
+            image = skimage.io.imread('pic.jpg', as_gray=True)
+            histogram, bin_edges = np.histogram(image, bins=256, range=(0, 1))
+            lst.append(histogram)
+        except Exception as e:
+            print(e)
+            print("no")
+    a = np.array(lst)
+    lst = (a.T).tolist()
+    df = pd.DataFrame(lst)
+    to_drop =[]
+    corr_matrix = df.corr()
+    for column in corr_matrix.columns:
+        corr_matrix[column][column]=-1
+        if all(corr_matrix[column] < 0.1):
+            to_drop.append(column)
+    for i in to_drop:
+        ordering = [ordering[i] for i in range(len(ordering)) if i not in to_drop]
+    return ordering
 
 def vsum(ip,n_clusters):
     """
@@ -124,16 +161,18 @@ def vsum(ip,n_clusters):
     clean(dir1,output_file) 
     get_feat(ip,fr,output_file)
     op = np.load(output_file)
-    
     preprocessed_frames,frame_no=get_frame(ip,fr,op)
     preprocessed_frames = np.array(preprocessed_frames)           
     n_clusters = getclusters(preprocessed_frames,n_clusters)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
-    kmeans = kmeans.fit(op)
+    print(len(preprocessed_frames))
+    kmeans = kmeans.fit(preprocessed_frames)
     closest = []
     closest, _ = pairwise_distances_argmin_min(kmeans.cluster_centers_,preprocessed_frames)
-    print(closest)
     ordering = [frame_no[closest[idx].item()] for idx in range(n_clusters)]
+    print(ordering)
+    ordering = removeredundant(ordering,ip,fr)
+    print(ordering)
     keyframes_vectors = [op[i] for i in ordering]
     print('Clustering Finished')
     np.save(output_file,keyframes_vectors)

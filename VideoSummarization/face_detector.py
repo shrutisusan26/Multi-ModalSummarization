@@ -1,3 +1,4 @@
+from tkinter.messagebox import RETRY
 import cv2
 
 def check_face_loc(img_h,img_w,x,y,w,h):
@@ -26,7 +27,8 @@ def face_detector(img,threshold=0.2):
     else:
         face_area = 0
         for (x, y, w, h) in faces:
-            #print(check_face_loc(img_h,img_w,x,y,w,h))
+            if check_face_loc(img_h,img_w,x,y,w,h):
+                return True
             face_area+=w*h 
         area_occupied = face_area/original_area
         #print(area_occupied)

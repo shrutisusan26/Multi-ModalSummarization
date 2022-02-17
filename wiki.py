@@ -25,22 +25,20 @@ text_list = os.listdir(dir1)
 new_dict =[]
 pred_sents,ref_sents=[],[]
 idx=0
-for fname in text_list[:5000]:
+for fname in text_list[:500]:
     try:
         d ={}
         with open(os.path.join(dir1,fname),"r",encoding ='utf8') as f:
             text = f.readlines()
-            print(text)
         dictionary={}
         for i,sent in enumerate(text):
                 #print(sent)
                 dictionary[str(i)]=text[i]
         #print(dictionary)       
-        summary_id=client.post(localhost+"summary",json={"article":dictionary ,"t_clusters":1,'fpath':"result\\result","order": {}})
+        summary_id=client.post(localhost+"summary",json={"article":dictionary ,"t_clusters":3,'fpath':"result\\result","order": {}})
         #print(summary_id,summary_id.status_code,summary_id.text)
         assert summary_id.status_code == 201
         summary_id=summary_id.json()
-        
         text_sum_order= client.get(localhost+f"tresult/{str(summary_id)}")
         assert text_sum_order.status_code == 200
         text_sum_order=text_sum_order.json()
@@ -54,7 +52,8 @@ for fname in text_list[:5000]:
             d['pred']='.'.join(text_sum_order.values())
             #break
             new_dict.append(d)
-    except:
+    except Exception as e:
+        print(e)
         continue
     finally:
         idx+=1

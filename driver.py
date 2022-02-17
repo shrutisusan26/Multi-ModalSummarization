@@ -11,7 +11,8 @@ client = TestClient(app)
 localhost="http://127.0.0.1:8000/"
 path= r"E:\Multi-Modal Summarization\Data\videos"
 tpath = r"E:\Multi-Modal Summarization\Data\trans"
-paths=['Intro.mp4' ]
+#paths=['Intro.mp4','History.mp4','Imageform.mp4','Imagerepn.mp4','LinearFilt.mp4','Imagefreq.mp4','Imagesampl.mp4','Edgedet.mp4','Fromedge.mp4','Scalespaces.mp4','lec11.mp4','lec13.mp4','lec14.mp4','lec16.mp4','lec19.mp4','lec22.mp4','lec25.mp4','lec28.mp4','lec31.mp4','lec34.mp4','lec37.mp4','lec40.mp4','lec43.mp4','lec44.mp4' ]
+paths = ["ml.mp4"]
 for i in range (len(paths)):
     videos = paths[i]
 
@@ -19,11 +20,11 @@ for i in range (len(paths)):
     # req=client.post(localhost+"link",json={"url":url})
     # assert req.status_code == 201
     # response=req.json()
-    fname= 'nptel' + str(i+1)+'.json'
+    fname= videos[:-4]+'.json'
     trans = os.path.join(tpath,fname)
     with open(trans,"r") as f:
         transcr = json.load(f)
-    summary_id= client.post(localhost+"summary",json={"article": process_yttranscript(transcr),"t_clusters":20,"fpath":os.path.join(path,videos),"order": {}})
+    summary_id= client.post(localhost+"summary",json={"article": process_yttranscript(transcr),"t_clusters":35,"fpath":os.path.join(path,videos),"order": {}})
     assert summary_id.status_code == 201
     summary_id=summary_id.json()
 
@@ -31,7 +32,7 @@ for i in range (len(paths)):
     assert text_sum_order.status_code == 200
     text_sum_order=text_sum_order.json()
 
-    vsummary_id=  client.post(localhost+"vsummary",json={"path": os.path.join(path,videos),"v_clusters": 10,"order": [0],"fr":0,"t_chunks": 0})
+    vsummary_id=  client.post(localhost+"vsummary",json={"path": os.path.join(path,videos),"v_clusters": 25,"order": [0],"fr":0,"t_chunks": 0})
     assert vsummary_id.status_code == 201
     vsummary_id=vsummary_id.json()
 

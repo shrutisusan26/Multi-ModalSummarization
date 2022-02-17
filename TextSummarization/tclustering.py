@@ -26,7 +26,7 @@ def cosine_distance_between_two_embeddings(v1, v2, th):
         int: Cosine similarty between the 2 vectors.
     """
     cs = 1- scipy.spatial.distance.cosine(v1, v2)
-    print(cs)
+    #print(cs)
     if cs >=th:
         return True
     else:
@@ -111,8 +111,8 @@ def lsa(kmeans,n_clusters,sentences,all=False,ordering=[]):
                 continue
         sent_score[i]=sent_score[i]/len(sentsumm[i].split())
     fsumm = [summ[i] for i in range(len(summ)) if sent_score[i]>0 ]
-    print(len(fsumm))
-    print(sent_score)
+    #print(len(fsumm))
+    #print(sent_score)
     return fsumm
 
 def gen_summary(sentences,ip,n_clusters):
@@ -134,8 +134,8 @@ def gen_summary(sentences,ip,n_clusters):
     list_sentences = list(sentences.values())
     preprocessed_sentences = preprocess(list_sentences)
     sentence_embed=req(preprocessed_sentences)
-    n_clusters = getclusters(sentence_embed,n_clusters)
-    keyphrases = rake_transcript(list_sentences)
+    n_clusters = getclusters(sentence_embed,n_clusters,3)
+    #keyphrases = rake_transcript(list_sentences)
     vectors = np.array(sentence_embed)
     kmeans = KMeans(n_clusters=n_clusters, random_state=0)
     kmeans = kmeans.fit(vectors)
@@ -153,30 +153,29 @@ def gen_summary(sentences,ip,n_clusters):
     #         flag=0
     n_ordering =[]
     c_sent = []
-    print(ordering)
+    #print(ordering)
     wc_sent = set(ordering)
     for i in ordering:
         n_ordering.append(i)
         if i==0:
-            n_ordering += [v for v in [i+1,i+2] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.8)]
+            n_ordering += [v for v in [i+1,i+2] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.95)]
         if i==1:
-            n_ordering += [v for v in [i-1,i+1,i+2] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.8)]
+            n_ordering += [v for v in [i-1,i+1,i+2] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.95)]
         if i == len(list_sentences)-1:
-            n_ordering += [v for v in [i-2,i-1] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.8)]
+            n_ordering += [v for v in [i-2,i-1] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.95)]
         if i == len(list_sentences)-2:
-            n_ordering += [v for v in [i-2,i-1,i+1] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.8)]
+            n_ordering += [v for v in [i-2,i-1,i+1] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.95)]
         if i!=0 and i!=len(list_sentences)-1 and i!=1 and i!=len(list_sentences)-2:
-            n_ordering += [v for v in [i-2,i-1,i+1,i+2] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.8)]
+            n_ordering += [v for v in [i-2,i-1,i+1,i+2] if cosine_distance_between_two_embeddings(vectors[i],vectors[v],0.95)]
     n_ordering=set(n_ordering)
     c_sent = set(c_sent)
     oc_sent = c_sent-wc_sent
     ordering = sorted(list(n_ordering))
     ordering = lsa(kmeans,n_clusters,sentences,True,ordering)
     ordering = sorted(ordering)
-
     con_sents = {j[0]:j[1] for i,j in enumerate(sentences.items()) if i in sorted(list(oc_sent))}
     summary_sentences = {j[0]:j[1] for i,j in enumerate(sentences.items()) if i in ordering}
-    print(con_sents)
+    #print(con_sents)
     summary_vectors = [vectors[i] for i in ordering]
     print('Clustering Finished')
     np.save(output_file,summary_vectors)
