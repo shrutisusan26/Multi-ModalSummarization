@@ -25,7 +25,7 @@ text_list = os.listdir(dir1)
 new_dict =[]
 pred_sents,ref_sents=[],[]
 idx=0
-for fname in text_list[:500]:
+for fname in text_list[:5000]:
     try:
         d ={}
         with open(os.path.join(dir1,fname),"r",encoding ='utf8') as f:

@@ -24,15 +24,20 @@ def get_frame(ip,fr,op):
         ret, frame = cap.read()
         if not ret:
             print("ERR")
+        
+        face_detector_op = face_detector(frame)
+        if isinstance(face_detector_op,bool):
+            continue
         area_arr.append(face_detector(frame))
         run_avg+=area_arr[i]
-    run_avg = run_avg/i
+    run_avg = run_avg/len(area_arr)
     processed_frames = []
     frame_no=[]
     for i, vector in enumerate(op):
-        if area_arr[i]!=True and area_arr[i]<=run_avg:
+        if area_arr[i]!=True or area_arr[i]<=run_avg:
             processed_frames.append(vector)
             frame_no.append(i)
+    print(len(op),len(processed_frames))
     return processed_frames,frame_no
     
 def cosine_distance_between_two_images(v1, v2):
